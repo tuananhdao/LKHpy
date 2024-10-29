@@ -1,2 +1,12 @@
-# LKH-python
-LKH-python is a Python library for solving travelling salesman problems (TSP) based on LKH 3. The library minimizes the overhead and optimizes the communication to the executable file.
+# LkhPy
+**LkhPy** is a Python library for solving travelling salesman problems (TSP) based on [**LKH 3**](http://akira.ruc.dk/~keld/research/LKH-3/). The library aims to minimize overheads and optimize the communication between the LKH library written in C and the Python interface. The Python bindings of existing C code is done via [pybind11](https://github.com/pybind/pybind11). The LKH folder containing the C code is *remained unchanged* from the original source.
+
+## Installation
+
+Easy installation via pip
+
+```bash
+python3 -m pip install LkhPy
+```
+
+## Usage
