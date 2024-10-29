@@ -14,7 +14,7 @@ list(REMOVE_ITEM LKH_SRC_FILES  ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/KSwapKick.hun
                                 ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/LKHmain.c)
 
 add_subdirectory(pybind11)
-pybind11_add_module(LkhPy src/LkhPy.cpp ${LKH_SRC_FILES})
+pybind11_add_module(LkhPy src/main.cpp ${LKH_SRC_FILES})
 
 target_compile_definitions(LkhPy
                            PRIVATE VERSION_INFO=${VERSION_INFO})

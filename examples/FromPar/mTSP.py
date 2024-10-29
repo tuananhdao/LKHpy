@@ -1,2 +1,2 @@
 import LkhPy as lk
-lk.FromPar("../DATA/whizzkids96.par")
+lk.FromPar("kroE100.par")
