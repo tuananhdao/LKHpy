@@ -10,7 +10,8 @@ include_directories(${LKH_DIR}/SRC/INCLUDE)
 file(GLOB LKH_SRC_FILES ${LKH_DIR}/SRC/*.c ${LKH_DIR}/SRC/INCLUDE/*.c)
 
 # Remove unused files from the list
-list(REMOVE_ITEM LKH_SRC_FILES ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/KSwapKick.hunt.c)
+list(REMOVE_ITEM LKH_SRC_FILES  ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/KSwapKick.hunt.c
+                                ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/LKHmain.c)
 
 add_subdirectory(pybind11)
 pybind11_add_module(LkhPy src/LkhPy.cpp ${LKH_SRC_FILES})
