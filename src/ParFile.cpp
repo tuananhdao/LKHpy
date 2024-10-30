@@ -7,7 +7,7 @@ extern "C" {
     #include "BIT.h"
 }
 
-int FromPar(char * parFileName) {
+int ParFile(char * parFileName) {
     GainType Cost, OldOptimum;
     double Time, LastTime;
     Node *N;

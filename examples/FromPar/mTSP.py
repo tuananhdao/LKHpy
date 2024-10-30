@@ -1,2 +1,2 @@
 import LkhPy as lk
-lk.FromPar("kroE100.par")
+lk.ParFile("kroE100.par")

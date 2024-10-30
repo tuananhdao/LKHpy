@@ -9,7 +9,7 @@ extern "C" {
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-#include "FromPar.cpp"
+#include "ParFile.cpp"
 
 PYBIND11_MODULE(LkhPy, m) {
     m.doc() = R"pbdoc(
@@ -21,10 +21,10 @@ PYBIND11_MODULE(LkhPy, m) {
         .. autosummary::
            :toctree: _generate
 
-           FromPar
+           ParFile
     )pbdoc";
 
-    m.def("FromPar", &FromPar, R"pbdoc(
+    m.def("ParFile", &ParFile, R"pbdoc(
         Add two numbers
 
         Some other explanation about the add function.
