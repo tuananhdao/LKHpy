@@ -19,7 +19,7 @@ python3 -m pip install LKHpy
 ```
 
 > [!NOTE]  
-> LKH 3 does not support Windows and neither does LKHpy
+> LKH 3 does not support Windows and neither does LKHpy. On Windows, use `WSL`.
 
 ## Usage
 

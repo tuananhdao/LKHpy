@@ -1,13 +1,5 @@
-#include <iostream>
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-namespace py = pybind11;
-
-extern "C" {
-    #include "LKH.h"
-    #include "Genetic.h"
-    #include "BIT.h"
-}
+#include "cost_matrix.h"
+#include "helpers/ReadParametersFromDictionary.h"
 
 // Function to accept a 2D NumPy array
 void cost_matrix(py::array_t<int> array, py::dict params) {
@@ -33,5 +25,5 @@ void cost_matrix(py::array_t<int> array, py::dict params) {
         std::cout << std::endl;
     }
 
-    // ReadParametersFromDictionary(params);
+    ReadParametersFromDictionary(params);
 }

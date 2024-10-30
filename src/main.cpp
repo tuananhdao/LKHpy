@@ -9,8 +9,8 @@ extern "C" {
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-#include "par_file.cpp"
-#include "cost_matrix.cpp"
+#include "par_file.h"
+#include "cost_matrix.h"
 
 PYBIND11_MODULE(LKHpy, m) {
     m.doc() = R"pbdoc(

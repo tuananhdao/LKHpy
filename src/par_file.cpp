@@ -1,11 +1,4 @@
-#include <pybind11/pybind11.h>
-namespace py = pybind11;
-
-extern "C" {
-    #include "LKH.h"
-    #include "Genetic.h"
-    #include "BIT.h"
-}
+#include "par_file.h"
 
 int par_file(char * parFileName) {
     GainType Cost, OldOptimum;
