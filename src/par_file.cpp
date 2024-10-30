@@ -1,6 +1,7 @@
 #include "par_file.h"
+#include "helpers/GetOutputTour.h"
 
-int par_file(char * parFileName) {
+py::array_t<int> par_file(char * parFileName) {
     GainType Cost, OldOptimum;
     double Time, LastTime;
     Node *N;
@@ -32,7 +33,7 @@ int par_file(char * parFileName) {
             SolveSFCSubproblems();
         else
             SolveTourSegmentSubproblems();
-        return EXIT_SUCCESS;
+        return GetOutputTour(BestTour);
     }
     AllocateStructures();
     if (ProblemType == TSPTW)
@@ -56,8 +57,8 @@ int par_file(char * parFileName) {
         RecordBestTour();
         CurrentPenalty = PLUS_INFINITY;
         BestPenalty = CurrentPenalty = Penalty ? Penalty() : 0;
-        WriteTour(OutputTourFileName, BestTour, BestCost);
-        WriteTour(TourFileName, BestTour, BestCost);
+        // WriteTour(OutputTourFileName, BestTour, BestCost);
+        // WriteTour(TourFileName, BestTour, BestCost);
         Runs = 0;
     }
 
@@ -134,7 +135,7 @@ int par_file(char * parFileName) {
             BestCost = Cost;
             RecordBetterTour();
             RecordBestTour();
-            WriteTour(TourFileName, BestTour, BestCost);
+            //WriteTour(TourFileName, BestTour, BestCost);
         }
         OldOptimum = Optimum;
         if (!Penalty ||
@@ -262,5 +263,5 @@ int par_file(char * parFileName) {
         SOP_Report(BestCost);
     }
     printff("\n");
-    return EXIT_SUCCESS;
+    return GetOutputTour(BestTour);
 }
