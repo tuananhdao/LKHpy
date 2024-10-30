@@ -1,12 +1,3 @@
-[project]
-name = "LkhPy"
-readme = {file = "README.md", content-type = "text/markdown"}
-license = {file = "LICENSE"}
-version = "0.0.1"
-
-[dynamic]
-description = "LkhPy is a Python library for solving travelling salesman problems (TSP) based on LKH 3. The library aims to minimize overheads and optimize the communication between LKH written in C and the Python interface."
-
 [build-system]
 requires = [
     "setuptools>=42",
