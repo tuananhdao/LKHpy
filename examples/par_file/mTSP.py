@@ -1,2 +1,2 @@
-import LkhPy as lk
+import LKHpy as lk
 print(lk.par_file("kroE100.par"))

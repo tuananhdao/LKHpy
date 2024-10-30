@@ -10,24 +10,28 @@ extern "C" {
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
 #include "par_file.cpp"
+#include "cost_matrix.cpp"
 
-PYBIND11_MODULE(LkhPy, m) {
+PYBIND11_MODULE(LKHpy, m) {
     m.doc() = R"pbdoc(
         Pybind11 example plugin
         -----------------------
 
-        .. currentmodule:: LkhPy
+        .. currentmodule:: LKHpy
 
         .. autosummary::
            :toctree: _generate
 
-           par_file
+            par_file
+            cost_matrix
     )pbdoc";
 
     m.def("par_file", &par_file, R"pbdoc(
-        Add two numbers
+        Run KLH algorithm with a parameter file .par
+    )pbdoc");
 
-        Some other explanation about the add function.
+    m.def ("cost_matrix", &cost_matrix, R"pbdoc(
+        Run KLH algorithm given a cost matrix and parameters
     )pbdoc");
 
 #ifdef VERSION_INFO

@@ -71,7 +71,7 @@ int par_file(char * parFileName) {
     /* Find a specified number (Runs) of local optima */
 
     for (Run = 1; Run <= Runs; Run++) {
-        // LkhPy: handle KeyboardInterrupt ///////////////////////////////////
+        // LKHpy: handle KeyboardInterrupt ///////////////////////////////////
         if (PyErr_CheckSignals() != 0)
                 throw py::error_already_set();
         //////////////////////////////////////////////////////////////////////

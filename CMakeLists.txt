@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4...3.18)
-project(LkhPy)
+project(LKHpy)
 
 set(LKH_DIR "LKH-3.0.12")
 
@@ -14,7 +14,7 @@ list(REMOVE_ITEM LKH_SRC_FILES  ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/KSwapKick.hun
                                 ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/LKHmain.c)
 
 add_subdirectory(pybind11)
-pybind11_add_module(LkhPy src/main.cpp ${LKH_SRC_FILES})
+pybind11_add_module(LKHpy src/main.cpp ${LKH_SRC_FILES})
 
-target_compile_definitions(LkhPy
+target_compile_definitions(LKHpy
                            PRIVATE VERSION_INFO=${VERSION_INFO})

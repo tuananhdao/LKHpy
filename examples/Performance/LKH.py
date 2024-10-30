@@ -1,5 +1,5 @@
 import sys
-import LkhPy as lk
+import LKHpy as lk
 
 def main():
     if len(sys.argv) < 2:
