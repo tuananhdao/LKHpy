@@ -7,4 +7,4 @@ MAX_TRIALS = 10000
 RUNS = 10
 SEED = 1
 TRACE_LEVEL = 1
-TOUR_FILE = whizz.txt
+OUTPUT_TOUR_FILE = whizz.txt
