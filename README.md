@@ -23,5 +23,5 @@ python3 -m pip install LkhPy
 `LKH.py`
 ```python
 import LkhPy as lp
-solution = lp.ParFile('example.par')
+solution = lp.par_file('example.par')
 ```

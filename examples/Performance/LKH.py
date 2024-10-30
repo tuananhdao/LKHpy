@@ -7,7 +7,7 @@ def main():
         sys.exit(1)
 
     fileName = sys.argv[1]
-    lk.ParFile(fileName)
+    lk.par_file(fileName)
 
 if __name__ == "__main__":
     main()
