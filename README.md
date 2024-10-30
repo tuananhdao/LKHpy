@@ -1,4 +1,4 @@
-![Version](https://img.shields.io/badge/Version-0.0.1-blue)
+![Version](https://img.shields.io/pypi/v/lkhpy)
 ![Language](https://img.shields.io/badge/Language-python-blue)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 [![Pip Actions Status][actions-pip-badge]][actions-pip-link]
