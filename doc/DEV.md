@@ -1,8 +1,13 @@
 ## Requirements
 
-Required packages: `python3`, `python3-config`, `cmake`.
+Required packages: `python3`, `python3-config`, `cmake`, `pytest`.
 
 ## Compile python .egg-info
 ```sh
-python3 -m pip install .
+pip install .
+```
+
+## Run tests
+```sh
+pytest
 ```
