@@ -19,7 +19,7 @@ pip install LKHpy
 ```
 
 > [!NOTE]
-> Built versions are tested againts lastest Ubuntu and MacOS
+> Built versions are tested againts lastest Ubuntu and MacOS.
 > LKH 3 does not support Windows (no one should use Windows anyway) and neither does LKHpy. As a work around, use `WSL`.
 
 ## Usage
