@@ -25,8 +25,6 @@ void ReadMatrix(py::array_t<int> array) {
     Read_EDGE_WEIGHT_FORMAT();
     Read_EDGE_WEIGHT_SECTION(array);
     Read_EDGE_WEIGHT_TYPE();
-    
-    
 
     Swaps = 0;
 
