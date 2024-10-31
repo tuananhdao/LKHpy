@@ -131,7 +131,7 @@ setup(
     author="Tuan Anh Dao",
     author_email="dta.hust@gmail.com",
     description="LKHpy",
-    long_description="",
+    long_description="LKHpy",
     ext_modules=[CMakeExtension("LKHpy")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
