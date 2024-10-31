@@ -23,8 +23,22 @@ python3 -m pip install LKHpy
 
 ## Usage
 
-`LKH.py`
 ```python
-import LKHpy as lp
-solution = lp.par_file('example.par')
+import LKHpy as LK
+
+cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
+solution = LK.TSP(cost_matrix)
+```
+
+```python
+import LKHpy as LK
+
+cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
+salesmen = 2
+solution = LK.mTSP(cost_matrix, salesmen)
+```
+
+```python
+import LKHpy as LK
+solution = LK.par_file('example.par')
 ```
