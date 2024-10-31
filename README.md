@@ -23,22 +23,47 @@ python3 -m pip install LKHpy
 
 ## Usage
 
+### Import
 ```python
 import LKHpy as LK
+```
 
+### Basic usage
+For TSP
+```python
 cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
 solution = LK.TSP(cost_matrix)
 ```
 
+For mTSP
 ```python
-import LKHpy as LK
-
 cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
 salesmen = 2
 solution = LK.mTSP(cost_matrix, salesmen)
 ```
 
+### Advanced usage
+
+Using parameters, see [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists.
 ```python
-import LKHpy as LK
+cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
+params = {
+        'MOVE_TYPE' : 5,
+        'PATCHING_C' : 3,
+        'PATCHING_A' : 2,
+        'SALESMEN' : 2,
+        'RUNS' : 1,
+        'TIME_LIMIT': 20}
+solution = LK.cost_matrix(cost_matrix, params)
+```
+
+Using par files, see `examples/par_file`
+```python
 solution = LK.par_file('example.par')
+```
+
+### Enable showing output
+
+```
+LK.SHOW_OUTPUT = True
 ```
