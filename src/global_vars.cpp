@@ -1,3 +1,3 @@
 #include "global_vars.h"
 
-bool SHOW_OUTPUT = true;
+bool SHOW_OUTPUT = false;

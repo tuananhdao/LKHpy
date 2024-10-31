@@ -40,8 +40,7 @@ py::array_t<int> cost_matrix(py::array_t<int> array, py::dict params) {
                                    MergeWithTourIPT;
 
     // ReadProblem();
-    //ReadMatrix(array);
-    return py::array_t<int>();
+    ReadMatrix(array);
 
     if (SubproblemSize > 0) {
         if (DelaunayPartitioning)

@@ -14,8 +14,8 @@ extern "C" {
 
 #include "helpers/ReadParametersFromDictionary.h"
 #include "helpers/GetOutputTour.h"
-////#include "helpers/ReadMatrix.h"
+#include "helpers/ReadMatrix.h"
 
-py::array_t<int> cost_matrix(py::array_t<int>, pybind11::dict);
+py::array_t<int> cost_matrix(py::array_t<int>, py::dict);
 
 #endif // COST_MATRIX_H
