@@ -135,6 +135,6 @@ setup(
     ext_modules=[CMakeExtension("LKHpy")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
-    extras_require={"test": ["pytest>=6.0","numpy"]},
+    extras_require={"test": ["pytest>=6.0","numpy>=1.20"]},
     python_requires=">=3.8",
 )
