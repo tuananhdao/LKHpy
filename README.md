@@ -21,6 +21,12 @@ Easy installation via pip. Remember to change `$USERNAME` and `$PAT` to yours.
 pip install git+https://$USERNAME:$PAT@github.com/tuananhdao/LKHpy.git
 ```
 
+Or if SSH has correct credentials,
+
+```bash
+pip install git+ssh://git@github.com/tuananhdao/LKHpy.git
+```
+
 > [!NOTE]
 > Built versions are tested against the latest Ubuntu and MacOS.
 > LKH 3 does not support Windows (no one should use Windows anyway) and neither does LKHpy. As a workaround, use `WSL`.
