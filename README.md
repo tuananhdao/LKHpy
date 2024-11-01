@@ -28,8 +28,8 @@ pip install git+ssh://git@github.com/tuananhdao/LKHpy.git
 ```
 
 > [!NOTE]
-> Built versions are tested against the latest Ubuntu and MacOS.
-> LKH 3 does not support Windows (no one should use Windows anyway) and neither does LKHpy. As a workaround, use `WSL`.
+> Built versions are tested against the latest Ubuntu and macOS.
+> LKH 3 does not support Windows (no one should use Windows anyway), and neither does LKHpy. As a workaround, use `WSL`.
 
 ## Usage
 
@@ -40,12 +40,12 @@ import LKHpy as LK
 
 ### Using cost matrix (distance matrix)
 
-See [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists. Some custom paramameters are defined by LKHpy and must start with '#'.
+See [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists. Some custom parameters are defined by LKHpy and must start with '#'.
 
 ```python
 cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
 params = {
-        '#SHOW_OUTPUT': False, # Must starts with '#'
+        '#SHOW_OUTPUT': False, # Must start with '#'
         'MOVE_TYPE' : 5,
         'PATCHING_C' : 3,
         'PATCHING_A' : 2,
