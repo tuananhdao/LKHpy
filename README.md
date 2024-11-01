@@ -32,7 +32,7 @@ pip install LKHpy
 import LKHpy as LK
 ```
 
-### Using `cost_matrix(matrix, params)`
+### Using cost matrix (distance matrix)
 
 See [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists. Some custom params are used by LKH3 and must start with '#'.
 
@@ -49,7 +49,7 @@ params = {
 solution = LK.cost_matrix(cost_matrix, params)
 ```
 
-### Using `coord(coordinates, params)`
+### Using coordinates
 
 **(in progress)**
 
