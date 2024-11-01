@@ -31,7 +31,7 @@ void ReadParametersFromDictionary(py::dict params)
     ExtraCandidates = 0;
     ExtraCandidateSetSymmetric = 0;
     ExtraCandidateSetType = QUADRANT;
-    Gain23Used = 1;
+    Gain23Used = 0;
     GainCriterionUsed = 1;
     GridSize = 1000000.0;
     InitialPeriod = -1;
