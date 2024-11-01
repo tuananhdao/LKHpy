@@ -1,4 +1,4 @@
-PROBLEM_FILE = kroE100.tsp
+PROBLEM_FILE = tests/data/kroE100.tsp
 MOVE_TYPE = 5
 PATCHING_C = 3
 PATCHING_A = 2
