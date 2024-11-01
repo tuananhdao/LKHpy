@@ -60,8 +60,14 @@ solution = LK.coord(coordinates, params)
 ```
 
 
-### Using par files `par_file(filePath)`
+### Using a `.par` file
 See `examples/par_file`
 ```python
 solution = LK.par_file('example.par')
 ```
+
+### LKHpy custom parameters
+
+| Parameter      | Meaning            | Default |
+|----------------|--------------------|---------|
+| `#SHOW_OUTPUT` | Show output by LKH | False   |
