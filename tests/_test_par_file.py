@@ -1,5 +1,5 @@
 import LKHpy as LK
-from tests.HELPERS.calculate_cost import calculate_cost_from_node_coord
+from calculate_cost import calculate_cost_from_node_coord
 
 def test_par_file():
     solution = LK.par_file('kroE100.par')

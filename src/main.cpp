@@ -13,8 +13,6 @@ extern "C" {
 #include "global_vars.h"
 #include "par_file.h"
 #include "cost_matrix.h"
-#include "tsp.h"
-#include "mtsp.h"
 
 PYBIND11_MODULE(LKHpy, m) {
     m.doc() = R"pbdoc(
@@ -41,26 +39,13 @@ PYBIND11_MODULE(LKHpy, m) {
 
     m.def("cost_matrix",
         [](py::array_t<int> array, py::dict params) -> py::array_t<int> {
+            if (params.contains("#SHOW_OUTPUT")) {
+                SHOW_OUTPUT = params.attr("get")("#SHOW_OUTPUT").cast<bool>();
+            }
+
             OutputSuppressor suppressor;
+
             return cost_matrix(array, params);
-        },
-        R"pbdoc(
-            Run KLH algorithm given a cost matrix and parameters
-        )pbdoc");
-
-    m.def("TSP",
-        [](py::array_t<int> array) -> py::array_t<int> {
-            OutputSuppressor suppressor;
-            return tsp(array);
-        },
-        R"pbdoc(
-            Run KLH algorithm given a cost matrix and parameters
-        )pbdoc");
-
-    m.def("mTSP",
-        [](py::array_t<int> array, int salesmen) -> py::array_t<int> {
-            OutputSuppressor suppressor;
-            return mtsp(array, salesmen);
         },
         R"pbdoc(
             Run KLH algorithm given a cost matrix and parameters

@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import LKHpy as LK
-from tests.HELPERS.calculate_cost import calculate_cost_from_cost_matrix
+from calculate_cost import calculate_cost_from_cost_matrix
 
 test_data = [
     ([[0, 1, 2], [1, 0, 3], [2, 3, 0]], [0, 1, 2, 0]),
@@ -10,5 +10,8 @@ test_data = [
 
 @pytest.mark.parametrize("cost_matrix, exact_tour", test_data)
 def test_tsp(cost_matrix, exact_tour):
-    result = LK.TSP(cost_matrix)
+    params = {
+        'RUNS' : 1
+    }
+    result = LK.cost_matrix(cost_matrix, params)
     assert calculate_cost_from_cost_matrix(cost_matrix, result) == calculate_cost_from_cost_matrix(cost_matrix, exact_tour), f"Expected {exact_tour}, got {result}"

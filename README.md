@@ -32,26 +32,14 @@ pip install LKHpy
 import LKHpy as LK
 ```
 
-### Basic usage
-For TSP
-```python
-cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
-solution = LK.TSP(cost_matrix)
-```
+### Using `cost_matrix(matrix, params)`
 
-For mTSP
-```python
-cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
-salesmen = 2
-solution = LK.mTSP(cost_matrix, salesmen)
-```
+See [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists. Some custom params are used by LKH3 and must start with '#'.
 
-### Advanced usage
-
-Using parameters, see [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists.
 ```python
 cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
 params = {
+        '#SHOW_OUTPUT': False, # Must starts with '#'
         'MOVE_TYPE' : 5,
         'PATCHING_C' : 3,
         'PATCHING_A' : 2,
@@ -61,13 +49,19 @@ params = {
 solution = LK.cost_matrix(cost_matrix, params)
 ```
 
-Using par files, see `examples/par_file`
+### Using `coord(coordinates, params)`
+
+**(in progress)**
+
+```python
+coordinates = [[1, 2], [2, 1], [3, 3], [1, 3]]
+params = {'RUNS' : 1}
+solution = LK.coord(coordinates, params)
+```
+
+
+### Using par files `par_file(filePath)`
+See `examples/par_file`
 ```python
 solution = LK.par_file('example.par')
-```
-
-### Enable showing output
-
-```
-LK.SHOW_OUTPUT = True
 ```
