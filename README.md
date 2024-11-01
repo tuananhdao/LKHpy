@@ -15,10 +15,10 @@
 
 ## Installation
 
-Easy installation via pip
+Easy installation via pip. Remember to change `$USERNAME` and `$PAT` to yours.
 
 ```bash
-pip install LKHpy
+pip install git+https://$USERNAME:$PAT@github.com/tuananhdao/LKHpy.git
 ```
 
 > [!NOTE]
