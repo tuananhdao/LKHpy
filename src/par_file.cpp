@@ -230,9 +230,9 @@ py::array_t<int> par_file(char * parFileName) {
         }
         CurrentPenalty = BestPenalty;
         MTSP_Report(BestPenalty, BestCost);
-        MTSP_WriteSolution(MTSPSolutionFileName, BestPenalty, BestCost);
+        //MTSP_WriteSolution(MTSPSolutionFileName, BestPenalty, BestCost);
     }
-    SINTEF_WriteSolution(SINTEFSolutionFileName, BestCost);
+    //SINTEF_WriteSolution(SINTEFSolutionFileName, BestCost);
     if (ProblemType == ACVRP ||
         ProblemType == BWTSP ||
         ProblemType == CCVRP ||

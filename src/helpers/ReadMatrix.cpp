@@ -446,7 +446,7 @@ static void Read_EDGE_WEIGHT_SECTION(py::array_t<int> array)
     for (i = 1; i <= Dim; i++) {
         Ni = &NodeSet[i];
         for (j = 1; j <= Dim; j++) {
-            w = data[i * Dim + j];
+            w = data[(i-1) * Dim + j-1];
             W = round(Scale * w);
             if (Asymmetric) {
                 Ni->C[j] = W;

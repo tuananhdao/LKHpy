@@ -91,6 +91,8 @@ void ReadParametersFromDictionary(py::dict params)
     TraceLevel = 1;
     TSPTW_Makespan = 0;
 
+    ProblemFileName = "dummy.tsp";
+
     for (auto item : params) {
         std::string key = py::str(item.first);
         std::string value = py::str(item.second);
@@ -686,6 +688,8 @@ void ReadParametersFromDictionary(py::dict params)
         if ((Token = strtok(0, Delimiters)) && Token[0] != '#')
             eprintf("Junk at end of line: %s", Token);
     }
+    if (!ProblemFileName)
+        eprintf("Problem file name is missing");
     if (SubproblemSize == 0 && SubproblemTourFileName != 0)
         eprintf("SUBPROBLEM_SIZE specification is missing");
     if (SubproblemSize > 0 && SubproblemTourFileName == 0)
@@ -694,6 +698,8 @@ void ReadParametersFromDictionary(py::dict params)
         eprintf("SUBPROBLEM specification not possible for SALESMEN > 1");
     if (CandidateSetType != DELAUNAY)
         DelaunayPure = 0;
+    free(LastLine);
+    LastLine = 0;
 }
 
 static char *GetFileName(char *Line)

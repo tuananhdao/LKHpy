@@ -12,9 +12,10 @@ py::array_t<int> cost_matrix(py::array_t<int> array, py::dict params) {
     Node *N;
     int i;
 
+    ParameterFileName = "Dummy";
     // ReadParameters();
     ReadParametersFromDictionary(params);
-
+    
     StartTime = LastTime = GetTime();
     MaxMatrixDimension = 20000;
     MergeWithTour =
@@ -237,9 +238,9 @@ py::array_t<int> cost_matrix(py::array_t<int> array, py::dict params) {
         }
         CurrentPenalty = BestPenalty;
         MTSP_Report(BestPenalty, BestCost);
-        MTSP_WriteSolution(MTSPSolutionFileName, BestPenalty, BestCost);
+        //MTSP_WriteSolution(MTSPSolutionFileName, BestPenalty, BestCost);
     }
-    SINTEF_WriteSolution(SINTEFSolutionFileName, BestCost);
+    //SINTEF_WriteSolution(SINTEFSolutionFileName, BestCost);
     if (ProblemType == ACVRP ||
         ProblemType == BWTSP ||
         ProblemType == CCVRP ||
