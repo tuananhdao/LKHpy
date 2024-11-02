@@ -13,7 +13,7 @@ def test_mtsp():
     params = {
         '#SHOW_OUTPUT': SHOW_OUTPUT,
         'SPECIAL': '',
-        'MTSP_OBJECTIVE': 'MINMAX',
+        'MTSP_OBJECTIVE': 'MINSUM',
         'MAX_CANDIDATES': 6,
         'MAX_TRIALS': 10000,
         'SALESMEN': 4,
@@ -21,6 +21,7 @@ def test_mtsp():
         'TOTAL_TIME_LIMIT': 7}
     result = LK.cost_matrix(cost_matrix, params)
     cost = calculate_cost_from_cost_matrix(cost_matrix, result)
+    print(cost)
     assert cost < target_cost, f"Expected cost smaller than {target_cost}, got {cost}"
 
 if __name__ == '__main__':
