@@ -481,7 +481,7 @@ static void Read_TYPE()
     unsigned int i;
 
     free(Type);
-
+    Type = Copy("TSP");
     ProblemType = TSP;
 
     Asymmetric = false;
