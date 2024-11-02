@@ -40,7 +40,7 @@ import LKHpy as LK
 
 ### Using cost matrix (distance matrix)
 
-See [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists. Some custom parameters are defined by LKHpy and must start with '#'.
+See [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists. Some [custom parameters](#lkhpy-custom-parameters) are defined by LKHpy and must start with '#'.
 
 ```python
 cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
