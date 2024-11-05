@@ -1,7 +1,7 @@
-#include "cost_matrix.h"
+#include "solver_float64.h"
 
 // Function to accept a 2D NumPy array
-py::array_t<int> cost_matrix(py::array_t<int> array, py::dict params) {
+py::array_t<int> solve_float64(py::str arrayType, py::array_t<double> array, py::dict params) {
     // Ensure the input is a 2D array
     if (array.ndim() != 2) {
         throw std::runtime_error("Input should be a 2D NumPy array");
@@ -24,7 +24,7 @@ py::array_t<int> cost_matrix(py::array_t<int> array, py::dict params) {
                                    MergeWithTourIPT;
 
     // ReadProblem();
-    ReadMatrix(array);
+    ReadXY_float64(arrayType, array);
 
     if (SubproblemSize > 0) {
         if (DelaunayPartitioning)

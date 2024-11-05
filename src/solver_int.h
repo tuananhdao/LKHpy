@@ -1,5 +1,5 @@
-#ifndef COST_MATRIX_H
-#define COST_MATRIX_H
+#ifndef SOLVER_INT_H
+#define SOLVER_INT_H
 
 #include <pybind11/pybind11.h>
 namespace py = pybind11;
@@ -15,7 +15,8 @@ extern "C" {
 #include "helpers/ReadParametersFromDictionary.h"
 #include "helpers/GetOutputTour.h"
 #include "helpers/ReadMatrix.h"
+#include "helpers/ReadXY_int.h"
 
-py::array_t<int> cost_matrix(py::array_t<int>, py::dict);
+py::array_t<int> solve_int(py::str, py::array_t<int>, py::dict);
 
-#endif // COST_MATRIX_H
+#endif // SOLVER_INT_H

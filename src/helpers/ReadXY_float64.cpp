@@ -1,6 +1,6 @@
-#include "ReadMatrix.h"
+#include "ReadXY_float64.h"
 
-void ReadMatrix(py::array_t<int> array) {
+void ReadXY_float64(py::str arrayType, py::array_t<double> array) {
     int i, j, K;
     char *Line, *Keyword;
 
@@ -20,11 +20,13 @@ void ReadMatrix(py::array_t<int> array) {
     size_t rows = shape[0];
     size_t cols = shape[1];
 
+    if (cols != 2)
+        eprintf("Array must have 2 columns");
+
     Read_TYPE();
     Read_DIMENSION(rows);
-    Read_EDGE_WEIGHT_FORMAT();
-    Read_EDGE_WEIGHT_SECTION(array);
-    Read_EDGE_WEIGHT_TYPE();
+    Read_EDGE_WEIGHT_TYPE(std::string(arrayType));
+    Read_NODE_COORD_SECTION(array);
 
     Swaps = 0;
 
@@ -382,6 +384,25 @@ static void CreateNodes()
     Link(N, FirstNode);
 }
 
+static void Read_EDGE_WEIGHT_TYPE(std::string arrayType)
+{
+    if (arrayType == "geo") {
+        WeightType = GEO;
+        Distance = Distance_GEO;
+        c = c_GEO;
+        CoordType = TWOD_COORDS;
+    }
+    else if (arrayType == "geom") {
+        WeightType = GEOM;
+        Distance = Distance_GEOM;
+        c = c_GEOM;
+        CoordType = TWOD_COORDS;
+    }
+    else {
+        eprintf("Unknown EDGE_WEIGHT_TYPE");
+    }
+}
+
 static int FixEdge(Node * Na, Node * Nb)
 {
     if (!Na->FixedTo1 || Na->FixedTo1 == Nb)
@@ -404,74 +425,49 @@ static void Read_DIMENSION(size_t dim)
     DimensionSaved = Dim = Dimension = (int)dim;
 }
 
-static void Read_EDGE_WEIGHT_FORMAT()
+static void Read_NODE_COORD_SECTION(py::array_t<double> array)
 {
-    WeightFormat = FULL_MATRIX;
-}
+    double* data = static_cast<double*>(array.request().ptr);
+    Node *N;
+    int Id, i;
 
-static void Read_EDGE_WEIGHT_SECTION(py::array_t<int> array)
-{
-    Node *Ni;
-    int i, j, n, W;
-    double w;
-
-    n = Dimension;
-    
+    CheckSpecificationPart();
+    if (CoordType != TWOD_COORDS && CoordType != THREED_COORDS)
+        eprintf("NODE_COORD_SECTION conflicts with NODE_COORD_TYPE: %s",
+                NodeCoordType);
     if (!FirstNode)
         CreateNodes();
-    if (!Asymmetric) {
-        CostMatrix = (int *) calloc((size_t) Dimension * (Dimension - 1) / 2,
-                                    sizeof(int));
-        Ni = FirstNode->Suc;
-        do {
-            Ni->C =
-                &CostMatrix[(size_t) (Ni->Id - 1) * (Ni->Id - 2) / 2] - 1;
-        }
-        while ((Ni = Ni->Suc) != FirstNode);
-    } else {
-        n = Dimension / 2;
-        CostMatrix = (int *) calloc((size_t) n * n, sizeof(int));
-        for (Ni = FirstNode; Ni->Id <= n; Ni = Ni->Suc)
-            Ni->C = &CostMatrix[(size_t) (Ni->Id - 1) * n] - 1;
-    }
+    N = FirstNode;
+    do
+        N->V = 0;
+    while ((N = N->Suc) != FirstNode);
     if (ProblemType == HPP)
         Dimension--;
-    if (Scale < 1)
-        Scale = 1;
-
-    int* data = static_cast<int*>(array.request().ptr);
-
     for (i = 1; i <= Dim; i++) {
-        Ni = &NodeSet[i];
-        for (j = 1; j <= Dim; j++) {
-            w = data[(i-1) * Dim + j-1];
-            W = round(Scale * w);
-            if (Asymmetric) {
-                Ni->C[j] = W;
-                if (j != i && W > M)
-                    M = W;
-            } else if (j < i)
-                Ni->C[j] = W;
+        Id = i;
+        N = &NodeSet[Id];
+        N->V = 1;
+        N->X = data[(i-1)*2 + 0];
+        N->Y = data[(i-1)*2 + 1];
+        if (CoordType == THREED_COORDS)
+            N->Z = data[(i-1)*2 + 2];
+        if (Name && !strcmp(Name, "d657")) {
+            N->X = (float) N->X;
+            N->Y = (float) N->Y;
         }
     }
-    if (Asymmetric) {
-        for (i = 1; i <= DimensionSaved; i++)
-            FixEdge(&NodeSet[i], &NodeSet[i + DimensionSaved]);
-        if (ProblemType == SOP || ProblemType == M1_PDTSP)
-            NodeSet[n].C[1] = 0;
-        Distance = Distance_ATSP;
-        WeightType = -1;
-    }
-}
-
-static void Read_EDGE_WEIGHT_TYPE()
-{
-    free(EdgeWeightType);
-    EdgeWeightType = Copy("EXPLICIT");
-    WeightType = EXPLICIT;
-    Distance = Distance_EXPLICIT;
-    if (Scale < 1)
-        Scale = 1;
+    N = FirstNode;
+    do
+        if (!N->V && N->Id <= Dim)
+            break;
+    while ((N = N->Suc) != FirstNode);
+    if (!N->V)
+        eprintf("NODE_COORD_SECTION: No coordinates given for node %d",
+                N->Id);
+    if (ProblemType == HPP)
+        Dimension++;
+    if (Asymmetric)
+        Convert2FullMatrix();
 }
 
 static void Read_TYPE()
@@ -483,4 +479,43 @@ static void Read_TYPE()
     ProblemType = TSP;
 
     Asymmetric = false;
+}
+
+static void Convert2FullMatrix()
+{
+    int n = DimensionSaved, i, j;
+    Node *Ni, *Nj;
+
+    if (Scale < 1)
+        Scale = 1;
+    if (n > MaxMatrixDimension) {
+        OldDistance = Distance;
+        Distance = Distance_Asymmetric;
+        for (i = 1; i <= n; i++) {
+            Ni = &NodeSet[i];
+            Nj = &NodeSet[i + n];
+            Nj->X = Ni->X;
+            Nj->Y = Ni->Y;
+            Nj->Z = Ni->Z;
+            FixEdge(Ni, Nj);
+        }
+        return;
+    }
+    CostMatrix = (int *) calloc((size_t) n * n, sizeof(int));
+    for (i = 1; i <= n; i++) {
+        Ni = &NodeSet[i];
+        Ni->C = &CostMatrix[(size_t) (i - 1) * n] - 1;
+    }
+    for (i = 1; i <= Dim; i++) {
+        Ni = &NodeSet[i];
+        for (j = i + 1; j <= Dim; j++) {
+            Nj = &NodeSet[j];
+            Ni->C[j] = Nj->C[i] = Distance(Ni, Nj);
+        }
+    }
+    for (i = 1; i <= n; i++)
+        FixEdge(&NodeSet[i], &NodeSet[i + n]);
+    c = 0;
+    Distance = Distance_ATSP;
+    WeightType = -1;
 }

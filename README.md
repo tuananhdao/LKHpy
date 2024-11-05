@@ -43,26 +43,35 @@ import LKHpy as LK
 See [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists. Some [custom parameters](#lkhpy-custom-parameters) are defined by LKHpy and must start with '#'.
 
 ```python
-cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]]
 params = {
-        '#SHOW_OUTPUT': False, # Must start with '#'
-        'MOVE_TYPE' : 5,
-        'PATCHING_C' : 3,
-        'PATCHING_A' : 2,
-        'SALESMEN' : 2,
-        'RUNS' : 1,
-        'TIME_LIMIT': 20}
+        '#SHOW_OUTPUT': False,
+        'SPECIAL': '',
+        'MTSP_OBJECTIVE': 'MINMAX',
+        'MAX_CANDIDATES': 6,
+        'MAX_TRIALS': 10000,
+        'SALESMEN': 2,
+        'RUNS': 1,
+        'TOTAL_TIME_LIMIT': 7}
+cost_matrix = [[0, 1, 2], [1, 0, 3], [2, 3, 0]] # int
 solution = LK.cost_matrix(cost_matrix, params)
 ```
 
 ### Using coordinates
-
-**(in progress)**
+#### Euclid distance
 
 ```python
-coordinates = [[1, 2], [2, 1], [3, 3], [1, 3]]
-params = {'RUNS' : 1}
-solution = LK.coord(coordinates, params)
+coordinates = [[1, 2], [2, 1], [3, 3], [1, 3]] # int
+solution = LK.euclid(coordinates, params)
+```
+##### GEOM and GEO distance (latitude longitude)
+```python
+coordinates = [[0.1, 0.1], [0.2, 1.2], [1.3, 0.3]] # double
+solution = LK.geo(coordinates, params)
+```
+
+```python
+coordinates = [[0.1, 0.1], [0.2, 1.2], [1.3, 0.3]] # double
+solution = LK.geom(coordinates, params)
 ```
 
 
