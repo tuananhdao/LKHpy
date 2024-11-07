@@ -14,6 +14,8 @@ void ReadXY_float64(py::str arrayType, py::array_t<double> array) {
     Distance = 0;
     C = 0;
     c = 0;
+    // LKHpy: temp bug fix assert false at LKH-3.0.12/SRC/LinKernighan.c:139
+    Precision = 99;
 
     // Get the shape of the array
     auto shape = array.shape();
