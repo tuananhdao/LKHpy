@@ -14,8 +14,6 @@ void ReadXY_float64(py::str arrayType, py::array_t<double> array) {
     Distance = 0;
     C = 0;
     c = 0;
-    // LKHpy: temp bug fix assert false at LKH-3.0.12/SRC/LinKernighan.c:139
-    Precision = 99;
 
     // LKHpy: temp bug fix for geo/geom assert false at LKH-3.0.12/SRC/LinKernighan.c:139
     Precision = 99;
