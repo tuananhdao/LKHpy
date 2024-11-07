@@ -12,9 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-13, ubuntu-latest]
         python-version: ["3.8", "3.11"]
-
     runs-on: ['self-hosted', 'Linux', 'X64']
 
     steps:
@@ -22,7 +20,7 @@ jobs:
       with:
         submodules: true
 
-    - uses: kishaningithub/setup-python-amazon-linux@v1
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
