@@ -36,7 +36,7 @@ def test_coord_large():
         data_list = json.load(json_file)
     data_array = np.array(data_list)
 
-    # This one sometimes create segmentation faults
+    # This one sometimes creates segmentation faults
     params = {
       '#SHOW_OUTPUT': SHOW_OUTPUT,
       'SPECIAL': '',
@@ -49,7 +49,7 @@ def test_coord_large():
       'PRECISION': 100
     }
 
-    # This one always
+    # This one always gives
     # Assertion failed: (Gain % Precision == 0), function LinKernighan, file LinKernighan.c, line 139.
     # params = {
     #   '#SHOW_OUTPUT': SHOW_OUTPUT,
