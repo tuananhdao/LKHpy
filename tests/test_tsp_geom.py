@@ -10,7 +10,7 @@ test_data = [
 ]
 
 @pytest.mark.parametrize("coordinates, exact_tour", test_data)
-def test_tsp_geo(coordinates, exact_tour):
+def test_tsp_geom(coordinates, exact_tour):
     params = {
         'MOVE_TYPE' : 5,
         'PATCHING_C' : 3,
