@@ -17,16 +17,10 @@ For those who are interested in developing the code, see [doc](./doc/DEV.md).
 
 ## Installation
 
-Easy installation via pip. Remember to change `$USERNAME` and `$PAT` to yours.
+Easy installation via `pip`
 
 ```bash
-pip install git+https://$USERNAME:$PAT@github.com/tuananhdao/LKHpy.git
-```
-
-Or if SSH has correct credentials,
-
-```bash
-pip install git+ssh://git@github.com/tuananhdao/LKHpy.git
+pip install LKHpy
 ```
 
 > [!NOTE]
