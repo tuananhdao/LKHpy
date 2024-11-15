@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.4...3.18)
 project(LKHpy)
 
 set(LKH_DIR "LKH-3.0.12")
+set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(${LKH_DIR}/SRC)
 include_directories(${LKH_DIR}/SRC/INCLUDE)
@@ -21,3 +22,4 @@ pybind11_add_module(LKHpy ${SRC_FILES} ${LKH_SRC_FILES})
 
 target_compile_definitions(LKHpy
                            PRIVATE VERSION_INFO=${VERSION_INFO})
+target_compile_options(LKHpy PRIVATE -g)
