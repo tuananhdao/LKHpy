@@ -30,4 +30,3 @@ target_link_libraries(LKHpy PRIVATE m)
 
 target_compile_definitions(LKHpy
                            PRIVATE VERSION_INFO=${VERSION_INFO})
-target_compile_options(LKHpy PRIVATE -g)
