@@ -23,10 +23,10 @@ add_subdirectory(pybind11)
 pybind11_add_module(LKHpy ${SRC_FILES} ${LKH_SRC_FILES})
 
 # Add the compiler flags
+# target_compile_options(LKHpy PRIVATE -O3 -Wall -D${TREE_TYPE} -g -flto -fcommon -DCAVA_CACHE)
 target_compile_options(LKHpy PRIVATE -O3 -Wall -D${TREE_TYPE} -g -flto -fcommon)
 
 # Add the linker flags
 target_link_libraries(LKHpy PRIVATE m)
 
-target_compile_definitions(LKHpy
-                           PRIVATE VERSION_INFO=${VERSION_INFO})
+target_compile_definitions(LKHpy PRIVATE VERSION_INFO=${VERSION_INFO})
