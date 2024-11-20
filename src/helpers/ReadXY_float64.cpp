@@ -12,13 +12,7 @@ void ReadXY_float64(py::str arrayType, py::array_t<double> array) {
     Type = EdgeWeightType = EdgeWeightFormat = 0;
     EdgeDataFormat = NodeCoordType = DisplayDataType = 0;
     Distance = 0;
-
-#ifdef CAVA_CACHE
     _C = 0;
-#else
-    C = 0;
-#endif
-  
     c = 0;
 
     // LKHpy: temp bug fix for geo/geom assert false at LKH-3.0.12/SRC/LinKernighan.c:139

@@ -195,6 +195,14 @@ FILE *ParameterFile, *ProblemFile, *PiFile, *InputTourFile,
 CostFunction Distance, D, c, OldDistance;
 MoveFunction BestMove, BacktrackMove, BestSubsequentMove;
 PenaltyFunction Penalty;
+
+#ifdef CAVA_CACHE
+CostFunction _C;
+#else
+CostFunction C;
+#endif
+int* cava_ForbiddenCacheSig;
+
 MergeTourFunction MergeWithTour;
 
 /* Genetic.h variables */

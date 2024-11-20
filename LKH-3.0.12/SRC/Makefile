@@ -1,3 +1,5 @@
+# CUSTOM=-DCAVA_CUSTOM # Uncomment to activate all changes
+
 TREE_TYPE = TWO_LEVEL_TREE
 # TREE_TYPE = THREE_LEVEL_TREE
 # TREE_TYPE = ONE_LEVEL_TREE
@@ -5,8 +7,8 @@ TREE_TYPE = TWO_LEVEL_TREE
 # CC = gcc
 IDIR = INCLUDE
 ODIR = OBJ
-CFLAGS = -O3 -Wall -I$(IDIR) -D$(TREE_TYPE) -g -flto -fcommon
-# CFLAGS = -O3 -Wall -I$(IDIR) -D$(TREE_TYPE) -g -flto -zmuldefs
+OPTIONS=$(CUSTOM)
+CFLAGS = -O3 -Wall -I$(IDIR) -D$(TREE_TYPE) -g -flto -fcommon $(OPTIONS)
 
 _DEPS = Delaunay.h GainType.h Genetic.h GeoConversion.h Hashing.h      \
         Heap.h LKH.h Segment.h Sequence.h BIT.h gpx.h CLARIST.h

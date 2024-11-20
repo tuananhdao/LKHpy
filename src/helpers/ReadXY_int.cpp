@@ -13,12 +13,7 @@ void ReadXY_int(py::str arrayType, py::array_t<int> array) {
     EdgeDataFormat = NodeCoordType = DisplayDataType = 0;
     Distance = 0;
 
-#ifdef CAVA_CACHE
     _C = 0;
-#else
-    C = 0;
-#endif  
-
     c = 0;
 
     // Get the shape of the array

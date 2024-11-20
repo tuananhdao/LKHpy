@@ -1,6 +1,11 @@
 #ifndef _LKH_H
 #define _LKH_H
 
+#ifdef CAVA_CUSTOM
+
+#define CAVA_CACHE   /* Cost and Forbidden function cache optimization */
+
+#endif
 /*
  * This header is used by almost all functions of the program. It defines 
  * macros and specifies data structures and function prototypes.

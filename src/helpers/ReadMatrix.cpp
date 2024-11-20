@@ -12,15 +12,9 @@ void ReadMatrix(py::array_t<int> array) {
     Type = EdgeWeightType = EdgeWeightFormat = 0;
     EdgeDataFormat = NodeCoordType = DisplayDataType = 0;
     Distance = 0;
-
-#ifdef CAVA_CACHE
     _C = 0;
-#else
-    C = 0;
-#endif
-
     c = 0;
-
+    
     // Get the shape of the array
     auto shape = array.shape();
     size_t rows = shape[0];
