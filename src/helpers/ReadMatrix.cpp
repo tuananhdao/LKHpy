@@ -12,7 +12,13 @@ void ReadMatrix(py::array_t<int> array) {
     Type = EdgeWeightType = EdgeWeightFormat = 0;
     EdgeDataFormat = NodeCoordType = DisplayDataType = 0;
     Distance = 0;
+
+#ifdef CAVA_CACHE
+    _C = 0;
+#else
     C = 0;
+#endif
+
     c = 0;
 
     // Get the shape of the array
@@ -170,7 +176,13 @@ void ReadMatrix(py::array_t<int> array) {
                         NodeSet[i].C[j] += NodeSet[i].ServiceTime;
         }
     }
+
+#ifdef CAVA_CACHE
+    _C = WeightType == EXPLICIT ? C_EXPLICIT : C_FUNCTION;
+#else
     C = WeightType == EXPLICIT ? C_EXPLICIT : C_FUNCTION;
+#endif 
+
     D = WeightType == EXPLICIT ? D_EXPLICIT : D_FUNCTION;
     if (ProblemType != CVRP && ProblemType != CVRPTW &&
         ProblemType != CTSP && ProblemType != STTSP &&

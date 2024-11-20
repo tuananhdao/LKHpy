@@ -192,7 +192,7 @@ int CandidateSetSymmetric, CandidateSetType, Capacity,
 
 FILE *ParameterFile, *ProblemFile, *PiFile, *InputTourFile,
     *InitialTourFile, *SubproblemTourFile, **MergeTourFile;
-CostFunction Distance, D, C, c, OldDistance;
+CostFunction Distance, D, c, OldDistance;
 MoveFunction BestMove, BacktrackMove, BestSubsequentMove;
 PenaltyFunction Penalty;
 MergeTourFunction MergeWithTour;

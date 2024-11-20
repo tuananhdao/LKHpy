@@ -14,7 +14,9 @@ file(GLOB LKH_SRC_FILES ${LKH_DIR}/SRC/*.c ${LKH_DIR}/SRC/INCLUDE/*.c)
 
 # Remove unused files from the list
 list(REMOVE_ITEM LKH_SRC_FILES  ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/KSwapKick.hunt.c
-                                ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/LKHmain.c)
+                                ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/LKHmain.c
+                                ${CMAKE_SOURCE_DIR}/${LKH_DIR}/SRC/ReadProblem.c
+    )
 
 # Find all .cpp files in the src directory
 file(GLOB SRC_FILES src/*.cpp src/helpers/*.cpp)
@@ -23,8 +25,8 @@ add_subdirectory(pybind11)
 pybind11_add_module(LKHpy ${SRC_FILES} ${LKH_SRC_FILES})
 
 # Add the compiler flags
-# target_compile_options(LKHpy PRIVATE -O3 -Wall -D${TREE_TYPE} -g -flto -fcommon -DCAVA_CACHE)
-target_compile_options(LKHpy PRIVATE -O3 -Wall -D${TREE_TYPE} -g -flto -fcommon)
+target_compile_options(LKHpy PRIVATE -O3 -Wall -D${TREE_TYPE} -g -flto -fcommon -DCAVA_CACHE)
+#target_compile_options(LKHpy PRIVATE -O3 -Wall -D${TREE_TYPE} -g -flto -fcommon)
 
 # Add the linker flags
 target_link_libraries(LKHpy PRIVATE m)

@@ -625,9 +625,9 @@ void WritePenalties(void);
 void WriteTour(char * FileName, int * Tour, GainType Cost);
 
 #ifdef CAVA_CACHE
-int *cava_ForbiddenCacheSig; /* Table of the signatures of cached distances */
+extern int *cava_ForbiddenCacheSig; /* Table of the signatures of cached distances */
 /* Caches are checked before anything else (to improve cache-friendliness and avoid multiple cache miss)*/
-CostFunction _C;
+extern CostFunction _C;
 static inline int C(Node *Na, Node *Nb) {
     if (CacheSig) {
         int Index, i, j;
@@ -664,7 +664,7 @@ static inline int Forbidden(Node *Na, Node *Nb) {
 #else
 #define _C C
 
-CostFunction C;
+extern CostFunction C;
 int Forbidden(Node *Na, Node *Nb);
 
 #endif

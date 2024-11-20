@@ -74,6 +74,7 @@ _OBJ = Activate.o AddCandidate.o AddExtraCandidates.o                  \
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.c $(DEPS)
+	mkdir -p $(ODIR)  # Ensure the $(ODIR) directory exists
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 .PHONY: 
