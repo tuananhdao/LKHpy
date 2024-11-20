@@ -11,7 +11,7 @@
 
 <img src="./static/banner.jpg" alt="LKHpy Banner" style='width: 100%; height: auto;'>
 
-**LKHpy** is a Python library for solving travelling salesman (TSP) and vehicle routing (VRP) problems based on <a href="http://akira.ruc.dk/~keld/research/LKH-3/" target="_blank">[**LKH 3**]</a>. The library aims to minimize overheads and optimize the communication between the LKH library written in C and the Python interface. The Python bindings of existing C code is done via [pybind11](https://github.com/pybind/pybind11). The LKH folder containing the C code *remains unchanged* from the original source. If you find the code useful, please cite the [original paper](http://akira.ruc.dk/~keld/research/LKH-3/LKH-3_REPORT.pdf) of Keld Helsgaun and consider giving this repo a star.
+**LKHpy** is a Python library for solving travelling salesman (TSP) and vehicle routing (VRP) problems based on <a href="http://akira.ruc.dk/~keld/research/LKH-3/" target="_blank">[**LKH 3**]</a>. The library aims to minimize overheads and optimize the communication between the LKH library written in C and the Python interface. The Python bindings of existing C code is done via [pybind11](https://github.com/pybind/pybind11). We added some performance improvements thanks to [this customized version](https://github.com/c4v4/LKH3) of LKH 3. If you find the code useful, please cite the [original paper](http://akira.ruc.dk/~keld/research/LKH-3/LKH-3_REPORT.pdf) of Keld Helsgaun and consider giving this repo a star.
 
 For those who are interested in developing the code, see [doc](./doc/DEV.md).
 

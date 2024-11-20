@@ -13,12 +13,12 @@ def test_mtsp():
     params = {
         '#SHOW_OUTPUT': SHOW_OUTPUT,
         'SPECIAL': '',
-        'MTSP_OBJECTIVE': 'MINSUM',
+        'MTSP_OBJECTIVE': 'MINMAX',
         'MAX_CANDIDATES': 6,
         'MAX_TRIALS': 10000,
         'SALESMEN': 4,
         'RUNS': 1,
-        'TOTAL_TIME_LIMIT': 7}
+        'TOTAL_TIME_LIMIT': 20}
     result = LK.cost_matrix(cost_matrix, params)
     cost = calculate_cost_from_cost_matrix(cost_matrix, result)
     print(cost)
