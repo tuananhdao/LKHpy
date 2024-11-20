@@ -192,9 +192,17 @@ int CandidateSetSymmetric, CandidateSetType, Capacity,
 
 FILE *ParameterFile, *ProblemFile, *PiFile, *InputTourFile,
     *InitialTourFile, *SubproblemTourFile, **MergeTourFile;
-CostFunction Distance, D, C, c, OldDistance;
+CostFunction Distance, D, c, OldDistance;
 MoveFunction BestMove, BacktrackMove, BestSubsequentMove;
 PenaltyFunction Penalty;
+
+#ifdef CAVA_CACHE
+CostFunction _C;
+#else
+CostFunction C;
+#endif
+int* cava_ForbiddenCacheSig;
+
 MergeTourFunction MergeWithTour;
 
 /* Genetic.h variables */
