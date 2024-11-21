@@ -4,6 +4,7 @@
 #ifdef CAVA_CUSTOM
 
 #define CAVA_CACHE   /* Cost and Forbidden function cache optimization */
+#define CAVA_PENALTY
 
 #endif
 /*
@@ -84,6 +85,8 @@ typedef GainType (*MergeTourFunction) (void);
 extern MergeTourFunction MergeWithTour;
 
 /* The Node structure is used to represent nodes (cities) of the problem */
+
+typedef struct _RouteData RouteData;
 
 struct Node {
     int Id;     /* Number of the node (1...Dimension) */
@@ -170,6 +173,15 @@ struct Node {
                                               adjoining nodes on the old tour 
                                               has been excluded */
     char Required; /* Is the node required in a STTSP? */
+
+#ifdef CAVA_PENALTY
+    int PFlag;  /*used to mark nodes */
+    RouteData* PetalId;  /* Pointer to struct with current route data */
+    int PetalRank;  /* Position of the node inside the route */
+    GainType prevPenalty; /* Previous Penalty value of the node, for partial iteration of routes */
+    GainType prevDemandSum; /* Previous Demand value of the node, for partial iteration of routes */
+    GainType prevCostSum; /* Previous Cost value of the node, for partial iteration of routes */
+#endif
 };
 
 /* The Candidate structure is used to represent candidate edges */
@@ -672,6 +684,18 @@ static inline int Forbidden(Node *Na, Node *Nb) {
 extern CostFunction C;
 int Forbidden(Node *Na, Node *Nb);
 
+#endif
+
+#ifdef CAVA_PENALTY
+typedef struct _RouteData
+{
+    int flag;
+    GainType OldPenalty;
+    GainType CandPenalty;
+    Node *minNode;
+} RouteData;
+extern RouteData *cava_PetalsData;
+extern Node **cava_NodeCache;
 #endif
 
 #endif
