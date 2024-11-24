@@ -244,13 +244,14 @@ static void update_Penalty_CVRP()
     int Size;
     do
     {
+        // go through each route and update CurrId->OldPenalty, CurrId->minNode
         DemandSum = Size = 0;
         N->PetalId = cava_PetalsData; //depots point to 0 cell
-        CurrId = cava_PetalsData + N->DepotId;
+        CurrId = cava_PetalsData + N->DepotId; // The index of the route is given by the depot id cava_PetalsData[0], cava_PetalsData[1], ...
         while ((N = SUCC(N))->DepotId == 0)
         {
             ++Size;
-            N->PetalId = CurrId;
+            N->PetalId = CurrId; // Assign the current route to the node
             DemandSum += N->Demand;
         }
         CurrId->OldPenalty = DemandSum > Capacity ? DemandSum - Capacity : 0;
@@ -264,32 +265,50 @@ GainType Penalty_CVRP_Old()
 GainType Penalty_CVRP()
 #endif
 {
+    /*
+    This function calculates the penalty for a Capacitated Vehicle Routing Problem (CVRP) solution.
+    It iterates through all routes starting from a depot and checks if the routes meet certain constraints.
+    If any constraint is violated, a penalty is added. The constraints checked are:
+      1. Minimum Route Size: If the number of nodes in a route is less than MTSPMinSize, a penalty is added.
+      2. Capacity Constraint: If the total demand of a route exceeds the vehicle capacity (Capacity), a penalty is added.
+      3. Distance Constraint: If the total distance of a route exceeds the DistanceLimit, a penalty is added.
+    If the penalty exceeds the current penalty (CurrentPenalty), the function returns an updated penalty value.
+    If no constraints are violated, the function returns the total penalty P.
+    */
     static Node *StartRoute = 0;
     Node *N, *CurrentRoute;
     GainType DemandSum, DistanceSum, P = 0;
     int Size;
-    if (!StartRoute)
-        StartRoute = Depot;
+    StartRoute = Depot; // Start from the first depot
     if (StartRoute->Id > DimensionSaved)
-        StartRoute -= DimensionSaved;
+        StartRoute -= DimensionSaved; // Start from the first node of the first route
     N = StartRoute;
+
+    // loop through all routes
     do
     {
         CurrentRoute = N;
-        DemandSum = 0;
-        Size = -1;
+        DemandSum = 0; // total demand of the route, should not exceed Capacity
+        Size = -1; // number of nodes in the route, should be at least MTSPMinSize
+
+        // loop through all nodes in the route
         do
         {
             ++Size;
             DemandSum += N->Demand;
-        } while ((N = SUCC(N))->DepotId == 0);
+        } while ((N = SUCC(N))->DepotId == 0); // while not back at the depot
+
+        // check if the route meets the constraints
+        // if the demand exceeds the capacity, add the excess to the penalty
         if (Size < MTSPMinSize)
             P += MTSPMinSize - Size;
+
+        // if the demand exceeds the capacity, add the excess to the penalty
         if (DemandSum > Capacity &&
             ((P += DemandSum - Capacity) > CurrentPenalty ||
              (P == CurrentPenalty && CurrentGain <= 0)))
         {
-            StartRoute = CurrentRoute;
+            // if the penalty exceeds the current penalty, return the updated penalty
             return CurrentPenalty + (CurrentGain > 0);
         }
         if (DistanceLimit != DBL_MAX)
@@ -300,9 +319,11 @@ GainType Penalty_CVRP()
             {
                 DistanceSum += (C(N, SUCC(N)) - N->Pi - SUCC(N)->Pi) /
                                Precision;
-                if (!N->DepotId)
+                if (!N->DepotId) // if not at the depot
                     DistanceSum += N->ServiceTime;
-            } while ((N = SUCC(N))->DepotId == 0);
+            } while ((N = SUCC(N))->DepotId == 0); // while not back at the depot
+
+            // if the distance exceeds the distance limit, add the excess to the penalty
             if (DistanceSum > DistanceLimit &&
                 ((P += DistanceSum - DistanceLimit) > CurrentPenalty ||
                  (P == CurrentPenalty && CurrentGain <= 0)))
@@ -311,6 +332,6 @@ GainType Penalty_CVRP()
                 return CurrentPenalty + (CurrentGain > 0);
             }
         }
-    } while (N != StartRoute);
+    } while (N != StartRoute); // loop until back at the first depot
     return P;
 }

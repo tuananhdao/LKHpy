@@ -1,7 +1,7 @@
 #include "LKH.h"
 #include "Segment.h"
 
-#define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
+// #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
 
 #ifdef CAVA_PENALTY
 #define ARE_LINKED(N1, N2) (N1->Suc == N2 || N1->Pred == N2)
@@ -49,7 +49,7 @@ GainType Penalty_MTSP_MINSUM()
 #endif
 {
     GainType P = 0;
-    if (Swaps && cava_PetalsData)
+    if (Swaps && cava_PetalsData && 0)
     {
         GainType DistanceSum;
         Node *N;
@@ -297,71 +297,22 @@ GainType Penalty_MTSP_MINMAX()
 #endif
 {
     GainType P = 0;
-    if (Swaps && cava_PetalsData)
+    if (Swaps && cava_PetalsData && 0)
     {
+        GainType DemandSum;
         Node *N;
-        GainType DistanceSum;
+
         for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
         {
-            for (int twice = 0; twice < 2; ++twice)
-            {
-                if (twice > 0)
-                    N = si->t2->PFlag ? si->t2 : si->t3;
-                else
-                    N = si->t1->PFlag ? si->t1 : si->t4;
-                if (N->PFlag)
-                {
-                    DistanceSum = 0;
-                    Node *savedN = N;
-                    int Size = 1;
-                    N->PFlag = 0;
-                    // Forward
-                    while ((N = SUC(N))->DepotId == 0)
-                    {
-                        N->PFlag = 0;
-                        DistanceSum += C(N, SUC(N)) - N->Pi - SUC(N)->Pi;
-                        ++Size;
-                    }
-                    GainType tempP = P + DistanceSum / Precision;
-                    if (DistanceSum > DistanceLimit &&
-                        (tempP > oldPenaltyMax ||
-                         (tempP == oldPenaltyMax && CurrentGain <= 0)))
-                    {
-                        for (SwapRecord *s = si - 1; s >= SwapStack; --s)
-                            s->t1->PFlag = s->t2->PFlag = s->t3->PFlag = s->t4->PFlag = 0;
-
-                        return CurrentPenalty;
-                    }
-                    // Backward
-                    N = savedN;
-                    while ((N = PRED(N))->DepotId == 0)
-                    {
-                        N->PFlag = 0;
-                        DistanceSum += C(N, PRED(N)) - N->Pi - PRED(N)->Pi;
-                        ++Size;
-                    }
-                    if (Size < MTSPMinSize)
-                        P += MTSPMinSize - Size;
-
-                    if (DistanceSum > DistanceLimit &&
-                        ((P += DistanceSum / Precision - DistanceLimit) > oldPenaltyMax ||
-                         (P == oldPenaltyMax && CurrentGain <= 0)))
-                    {
-                        for (SwapRecord *s = si - 1; s >= SwapStack; --s)
-                            s->t1->PFlag = s->t2->PFlag = s->t3->PFlag = s->t4->PFlag = 0;
-
-                        return CurrentPenalty;
-                    }
-                }
-            }
+            // fill in here
         }
         if (!CurrentPenalty)
             return P;
-        if (P < oldPenaltyMax ||
-            (P == oldPenaltyMax && CurrentGain > 0))
+        if (P < oldPenaltySum ||
+            (P == oldPenaltySum && CurrentGain > 0))
         {
-            update_Penalty_MTSP_MINMAX(); // Improved!
-            return MAX(CurrentPenalty, P);
+            update_Penalty_MTSP_MINMAX(); //Improved!
+            return CurrentPenalty + P - oldPenaltySum;
         }
         else
             return CurrentPenalty + (CurrentGain > 0);
@@ -374,7 +325,6 @@ GainType Penalty_MTSP_MINMAX()
         {
             if (!cava_PetalsData)
                 cava_PetalsData = (RouteData *)calloc(Salesmen + 1, sizeof(RouteData));
-                
             update_Penalty_MTSP_MINMAX();
         }
         return P;
@@ -446,6 +396,7 @@ static void update_Penalty_MTSP_MINMAX()
     RouteData *CurrId;
     GainType Cost;
     int Size;
+    int i = 1;
     do
     {
         Size = 0;
@@ -463,9 +414,8 @@ static void update_Penalty_MTSP_MINMAX()
             Cost += C(N, NextN) - N->Pi - NextN->Pi;
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
-        if (Cost > CurrId->OldPenalty) {
-            CurrId->OldPenalty = Cost;
-        }
+        CurrId->OldPenalty = Cost;
+        printff("New: route %d : %d\n", i++, Cost);
         CurrId->minNode = Size ? NULL : N; /* Save the adjacent depot to recognize empty routes */
     } while (N != Depot);
 }
@@ -475,6 +425,7 @@ GainType Penalty_MTSP_MINMAX_Old()
 GainType Penalty_MTSP_MINMAX()
 #endif
 {
+    // Forward is true if the next node is not the first node of the next route
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
     static Node *StartRoute = 0;
     Node *N, *NextN, *CurrentRoute;
@@ -489,6 +440,8 @@ GainType Penalty_MTSP_MINMAX()
             NextN = Forward ? SUCC(N) : PREDD(N);
             if (NextN->Id > DimensionSaved)
                 NextN = Forward ? SUCC(NextN) : PREDD(NextN);
+            // Cost is the sum of the distances between the nodes in the route
+            // minus the Pi values of the nodes
             Cost += C(N, NextN) - N->Pi - NextN->Pi;
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
@@ -500,6 +453,7 @@ GainType Penalty_MTSP_MINMAX()
             P = Cost;
         }
     } while (N != StartRoute);
+    printff("Old: all routes : %d\n", P);
     return P;
 }
 
