@@ -151,6 +151,7 @@ static int setup_Penalty_MTSP_MINSUM()
             //If a move has involved the edge of an empty route an additional empty one needs to be counted
             Node *t1 = s->t1, *t2 = s->t2, *t3 = s->t3, *t4 = s->t4;
 
+            // was_empty_route: a route with no customers, just a depot-to-depot link
             if ((!ARE_LINKED(t1, t2) && was_empty_route(t1, t2)) ||
                 (!ARE_LINKED(t3, t4) && was_empty_route(t3, t4)))
             {
@@ -186,6 +187,7 @@ static int setup_Penalty_MTSP_MINSUM()
 
 static int was_empty_route(Node *N1, Node *N2)
 {
+    // a route with no customers, just a depot-to-depot link
     int *f1 = &cava_PetalsData[N1->DepotId].flag;
     int *f2 = &cava_PetalsData[N2->DepotId].flag;
     return (!*f1 && (*f1 |= (cava_PetalsData[N1->DepotId].minNode == N2))) ||
@@ -308,11 +310,11 @@ GainType Penalty_MTSP_MINMAX()
         }
         if (!CurrentPenalty)
             return P;
-        if (P < oldPenaltySum ||
-            (P == oldPenaltySum && CurrentGain > 0))
+        if (P < oldPenaltyMax ||
+            (P == oldPenaltyMax && CurrentGain > 0))
         {
             update_Penalty_MTSP_MINMAX(); //Improved!
-            return CurrentPenalty + P - oldPenaltySum;
+            return MAX(CurrentPenalty, P);
         }
         else
             return CurrentPenalty + (CurrentGain > 0);
@@ -334,20 +336,25 @@ GainType Penalty_MTSP_MINMAX()
 /* Returns 1 if only one route is involved in the current move */
 static int setup_Penalty_MTSP_MINMAX()
 {
+    /*
+        Setting up the initial penalty values for the routes involved
+    */
     oldPenaltyMax = 0;
     int petalCounter = 0;
-    if (CurrentPenalty)
+    if (CurrentPenalty) // Penalty_MTSP_MINMAX_Old() should be executed before this function
     {
         for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
         {
             // If a move has involved the edge of an empty route an additional empty one needs to be counted
             Node *t1 = s->t1, *t2 = s->t2, *t3 = s->t3, *t4 = s->t4;
+            // the edges (t1, t2) and (t3, t4) are removed,
+            // and the new edges (t1, t3) and (t2, t4) are added to form a new tour.
 
+            // was_empty_route: a route with no customers, just a depot-to-depot link
             if ((!ARE_LINKED(t1, t2) && was_empty_route(t1, t2)) ||
                 (!ARE_LINKED(t3, t4) && was_empty_route(t3, t4)))
             {
                 ++petalCounter;
-                oldPenaltyMax = MAX(oldPenaltyMax, (GainType)MTSPMinSize);
             }
 
             petalCounter += setup_Node_MTSP_MINMAX(t1) + setup_Node_MTSP_MINMAX(t2) +
@@ -367,6 +374,8 @@ static int setup_Penalty_MTSP_MINMAX()
         if (petalCounter == 1)
             return 1;
     }
+    // mark non-depot nodes involved in the swaps with PFlag = 1,
+    // Depot nodes are marked with PFlag = 0 
     for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
     {
         s->t1->PFlag = !s->t1->DepotId;
@@ -379,10 +388,17 @@ static int setup_Penalty_MTSP_MINMAX()
 
 static int setup_Node_MTSP_MINMAX(Node *N)
 {
-    if (!N->PetalId->flag)
+    /*
+    The role of setup_Node_CVRP() is to ensure that each route's penalty is counted only once
+    during the setup phase of the penalty calculation. This helps in accurately computing
+    the previous penalty sum (oldPenaltySum) for the routes involved in the current move,
+    which is essential for determining if the new solution is an improvement.
+    */
+    if (!N->PetalId->flag) // check if the Node's Route has been Processed
     {
-        oldPenaltyMax = MAX(oldPenaltyMax, N->PetalId->OldPenalty);
-        N->PetalId->flag = 1;
+        oldPenaltyMax = MAX(oldPenaltyMax, N->PetalId->OldPenalty); // update the oldPenaltyMax
+        N->PetalId->flag = 1; // Mark Route as Processed
+        // returns 1 if the node is not a depot (indicating a valid route), otherwise it returns 0
         return (N->PetalId != cava_PetalsData); // Depots have PetalId_index == 0
     }
     return 0;
@@ -391,6 +407,10 @@ static int setup_Node_MTSP_MINMAX(Node *N)
 /* Update route data when a new improving tour is found */
 static void update_Penalty_MTSP_MINMAX()
 {
+    // updates the penalty metadata for each route in the solution
+    // It iterates through all routes starting from the depot
+    // and updates the OldPenalty and minNode fields in the RouteData structure for each route.
+    // not the entire solution / max(all routes)
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
     Node *N = Depot, *NextN;
     RouteData *CurrId;

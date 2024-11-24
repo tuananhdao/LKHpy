@@ -218,6 +218,7 @@ static int setup_Penalty_CVRP()
 
 static int was_empty_route(Node *N1, Node *N2)
 {
+    // a route with no customers, just a depot-to-depot link
     int *f1 = &cava_PetalsData[N1->DepotId].flag;
     int *f2 = &cava_PetalsData[N2->DepotId].flag;
     return (!*f1 && (*f1 |= (cava_PetalsData[N1->DepotId].minNode == N2))) ||
