@@ -11,8 +11,13 @@ test_data = [
 @pytest.mark.parametrize("cost_matrix, salesmen, exact_tour", test_data)
 def test_mtsp(cost_matrix, salesmen, exact_tour):
     params = {
+        '#SHOW_OUTPUT': SHOW_OUTPUT,
         'RUNS' : 1,
         'SALESMEN' : salesmen
     }
     result = LK.cost_matrix(cost_matrix, params)
     assert calculate_cost_from_cost_matrix(cost_matrix, result) == calculate_cost_from_cost_matrix(cost_matrix, exact_tour), f"Expected {exact_tour}, got {result}"
+
+if __name__ == '__main__':
+    SHOW_OUTPUT = True
+    test_mtsp(test_data[1][0], test_data[1][1], test_data[1][2])
