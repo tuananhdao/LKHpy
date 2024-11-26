@@ -63,7 +63,7 @@ GainType Penalty_MTSP_MINSUM()
                 (si->t2->DepotId && si->t3->DepotId && ARE_LINKED(si->t2, si->t3)))
                 P += MTSPMinSize;
             for (int twice = 0; twice < 2; ++twice)
-            {
+            {   
                 if (twice > 0)
                     N = si->t2->PFlag ? si->t2 : si->t3;
                 else
@@ -287,7 +287,7 @@ GainType Penalty_MTSP_MINMAX()
     GainType P2 = Penalty_MTSP_MINMAX_Old();
     int accepted1 = P1 < CurrentPenalty || (P1 == CurrentPenalty && CurrentGain > 0);
     int accepted2 = P2 < CurrentPenalty || (P2 == CurrentPenalty && CurrentGain > 0);
-    // assert(P1 == P2);
+    assert(P1 == P2);
     assert(accepted1 == accepted2);
     assert(P1 >= 0);
     return P1;
@@ -301,13 +301,60 @@ GainType Penalty_MTSP_MINMAX()
     GainType P = 0;
     if (Swaps && cava_PetalsData && 0)
     {
-        GainType DemandSum;
+        GainType DistanceSum;;
         Node *N;
+        // Moves that only touch one route cannot change the penalty value
+        if (setup_Penalty_MTSP_MINMAX() == 1)
+            return CurrentPenalty;
 
         for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
         {
-            // fill in here
+            for (int twice = 0; twice < 2; ++twice) 
+            {
+                Node *savedN = N;
+
+                // Choose N is non-depot node
+                if (twice > 0)
+                    N = si->t2->PFlag ? si->t2 : si->t3;
+                else
+                    N = si->t1->PFlag ? si->t1 : si->t4;
+
+                if (N->PFlag) { // this new route is not checked 
+                    
+                    DistanceSum = 0; // length of this route
+                    N->PFlag = 0; // mark this route as checked
+
+                    // Forward : loop until meet depot 
+                    while ((N = SUC(N))->DepotId == 0) 
+                    {
+                        N->PFlag = 0;
+                        DistanceSum += (C(N, SUCC(N)) - N->Pi - SUCC(N)->Pi) /
+                               Precision;
+
+                    }
+                    GainType tempP = Max(P, DistanceSum);
+
+                    if (DistanceSum <= oldPenaltyMax) 
+                    {
+                        // TODO:     
+                    }
+
+                    // Backward : loop until meet depot
+                    N = savedN;
+                    while ((N = PRED(N))->DepotId == 0)
+                    {
+                        N->PFlag = 0;
+                        DistanceSum += (C(N, SUCC(N)) - N->Pi - SUCC(N)->Pi) /
+                               Precision;
+                    } 
+                    
+
+
+                    
+                }
+            }
         }
+
         if (!CurrentPenalty)
             return P;
         if (P < oldPenaltyMax ||
