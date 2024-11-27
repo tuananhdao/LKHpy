@@ -1,7 +1,7 @@
 #include "LKH.h"
 #include "Segment.h"
 
-// #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
+#define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
 
 #ifdef CAVA_PENALTY
 #define ARE_LINKED(N1, N2) (N1->Suc == N2 || N1->Pred == N2)
@@ -283,8 +283,8 @@ static GainType Penalty_MTSP_MINMAX_();
 GainType Penalty_MTSP_MINMAX()
 {
     assert(CurrentPenalty >= 0);
-    GainType P1 = Penalty_MTSP_MINMAX_();
     GainType P2 = Penalty_MTSP_MINMAX_Old();
+    GainType P1 = Penalty_MTSP_MINMAX_();
     int accepted1 = P1 < CurrentPenalty || (P1 == CurrentPenalty && CurrentGain > 0);
     int accepted2 = P2 < CurrentPenalty || (P2 == CurrentPenalty && CurrentGain > 0);
     assert(P1 == P2);
@@ -299,58 +299,44 @@ GainType Penalty_MTSP_MINMAX()
 #endif
 {
     GainType P = 0;
-    if (Swaps && cava_PetalsData && 0)
+    if (Swaps && cava_PetalsData)
     {
         GainType DistanceSum;;
         Node *N;
-        // Moves that only touch one route cannot change the penalty value
-        if (setup_Penalty_MTSP_MINMAX() == 1)
-            return CurrentPenalty;
+        setup_Penalty_MTSP_MINMAX();
 
         for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
         {
             for (int twice = 0; twice < 2; ++twice) 
             {
-                Node *savedN = N;
-
                 // Choose N is non-depot node
                 if (twice > 0)
                     N = si->t2->PFlag ? si->t2 : si->t3;
                 else
                     N = si->t1->PFlag ? si->t1 : si->t4;
 
-                if (N->PFlag) { // this new route is not checked 
-                    
+                if (N->PFlag) {
+                    Node *savedN = N;
                     DistanceSum = 0; // length of this route
-                    N->PFlag = 0; // mark this route as checked
+                    N->PFlag = 0; // mark this route as checked to avoid multiple checks
 
                     // Forward : loop until meet depot 
-                    while ((N = SUC(N))->DepotId == 0) 
+                    while ((N = SUCC(N))->DepotId == 0) 
                     {
                         N->PFlag = 0;
-                        DistanceSum += (C(N, SUCC(N)) - N->Pi - SUCC(N)->Pi) /
-                               Precision;
-
+                        DistanceSum += (C(N, SUCC(N)) - N->Pi - SUCC(N)->Pi) / Precision;
                     }
-                    GainType tempP = Max(P, DistanceSum);
-
-                    if (DistanceSum <= oldPenaltyMax) 
-                    {
-                        // TODO:     
-                    }
-
-                    // Backward : loop until meet depot
+                    
+                     // Backward : loop until meet depot
                     N = savedN;
-                    while ((N = PRED(N))->DepotId == 0)
+                    while ((N = PREDD(N))->DepotId == 0)
                     {
                         N->PFlag = 0;
-                        DistanceSum += (C(N, SUCC(N)) - N->Pi - SUCC(N)->Pi) /
-                               Precision;
+                        DistanceSum += (C(N, PREDD(N)) - N->Pi - PREDD(N)->Pi) / Precision;
                     } 
-                    
 
-
-                    
+                    // TODO : update P according to new DistanceSum
+                    P = MAX(P, DistanceSum);
                 }
             }
         }
@@ -418,8 +404,8 @@ static int setup_Penalty_MTSP_MINMAX()
 
             t1->PetalId->flag = t2->PetalId->flag = t3->PetalId->flag = t4->PetalId->flag = 0;
         }
-        if (petalCounter == 1)
-            return 1;
+        // if (petalCounter == 1)
+        //     return 1;
     }
     // mark non-depot nodes involved in the swaps with PFlag = 1,
     // Depot nodes are marked with PFlag = 0 
@@ -438,10 +424,10 @@ static int setup_Node_MTSP_MINMAX(Node *N)
     /*
     The role of setup_Node_CVRP() is to ensure that each route's penalty is counted only once
     during the setup phase of the penalty calculation. This helps in accurately computing
-    the previous penalty sum (oldPenaltySum) for the routes involved in the current move,
+    the previous penalty max (oldPenaltyMax) for the routes involved in the current move,
     which is essential for determining if the new solution is an improvement.
     */
-    if (!N->PetalId->flag) // check if the Node's Route has been Processed
+    if (!N->PetalId->flag) // if the Node's Route has not been Processed
     {
         oldPenaltyMax = MAX(oldPenaltyMax, N->PetalId->OldPenalty); // update the oldPenaltyMax
         N->PetalId->flag = 1; // Mark Route as Processed
@@ -458,6 +444,7 @@ static void update_Penalty_MTSP_MINMAX()
     // It iterates through all routes starting from the depot
     // and updates the OldPenalty and minNode fields in the RouteData structure for each route.
     // not the entire solution / max(all routes)
+    printff("Updated! : \n");
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
     Node *N = Depot, *NextN;
     RouteData *CurrId;
