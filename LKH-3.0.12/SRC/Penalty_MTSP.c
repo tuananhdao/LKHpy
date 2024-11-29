@@ -321,22 +321,31 @@ GainType Penalty_MTSP_MINMAX()
                     N->PFlag = 0; // mark this route as checked to avoid multiple checks
 
                     // Forward : loop until meet depot 
-                    while ((N = SUCC(N))->DepotId == 0) 
+                    while ((N = SUC(N))->DepotId == 0) 
                     {
                         N->PFlag = 0;
-                        DistanceSum += (C(N, SUCC(N)) - N->Pi - SUCC(N)->Pi) / Precision;
+                        DistanceSum += C(N, SUC(N)) - N->Pi - SUC(N)->Pi;
                     }
                     
                      // Backward : loop until meet depot
                     N = savedN;
-                    while ((N = PREDD(N))->DepotId == 0)
+                    while ((N = PRED(N))->DepotId == 0)
                     {
                         N->PFlag = 0;
-                        DistanceSum += (C(N, PREDD(N)) - N->Pi - PREDD(N)->Pi) / Precision;
+                        DistanceSum += C(N, PRED(N)) - N->Pi - PRED(N)->Pi;
                     } 
 
                     // TODO : update P according to new DistanceSum
-                    P = MAX(P, DistanceSum);
+                    P = MAX(P, DistanceSum / Precision);
+
+                    if (P > oldPenaltyMax ||
+                         (P == oldPenaltyMax && CurrentGain <= 0))
+                    {
+                        // no improvement
+                        for (SwapRecord *s = si - 1; s >= SwapStack; --s)
+                            s->t1->PFlag = s->t2->PFlag = s->t3->PFlag = s->t4->PFlag = 0;
+                        return CurrentPenalty;
+                    }
                 }
             }
         }
@@ -347,7 +356,10 @@ GainType Penalty_MTSP_MINMAX()
             (P == oldPenaltyMax && CurrentGain > 0))
         {
             update_Penalty_MTSP_MINMAX(); //Improved!
-            return MAX(CurrentPenalty, P);
+            printf("P : %d\n", P);
+            printf("CurrentPenalty : %d\n", CurrentPenalty);
+            printff("This return is wrong MAX(CurrentPenalty, P): %d\n", MAX(CurrentPenalty, P));
+            return MAX(CurrentPenalty, P); // Return is wrong, still keep the last max
         }
         else
             return CurrentPenalty + (CurrentGain > 0);
@@ -444,7 +456,6 @@ static void update_Penalty_MTSP_MINMAX()
     // It iterates through all routes starting from the depot
     // and updates the OldPenalty and minNode fields in the RouteData structure for each route.
     // not the entire solution / max(all routes)
-    printff("Updated! : \n");
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
     Node *N = Depot, *NextN;
     RouteData *CurrId;
