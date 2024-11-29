@@ -14,6 +14,7 @@ static int setup_Node_MTSP_MINSUM(Node *);         /* Utility function: count th
 static int setup_Penalty_MTSP_MINSUM(void);        /* Compute the previous penalty sum. */
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 GainType Penalty_MTSP_MINMAX_Old(void);
 static void update_Penalty_MTSP_MINMAX(void);
 static int setup_Node_MTSP_MINMAX(Node *);
@@ -287,6 +288,9 @@ GainType Penalty_MTSP_MINMAX()
     GainType P1 = Penalty_MTSP_MINMAX_();
     int accepted1 = P1 < CurrentPenalty || (P1 == CurrentPenalty && CurrentGain > 0);
     int accepted2 = P2 < CurrentPenalty || (P2 == CurrentPenalty && CurrentGain > 0);
+    printff("CurrentPenalty: %d\n", CurrentPenalty);
+    printff("P1=%d\n", P1);
+    printff("P2=%d\n", P2);
     assert(P1 == P2);
     assert(accepted1 == accepted2);
     assert(P1 >= 0);
@@ -301,7 +305,7 @@ GainType Penalty_MTSP_MINMAX()
     GainType P = 0;
     if (Swaps && cava_PetalsData)
     {
-        GainType DistanceSum;;
+        GainType DistanceSum;
         Node *N;
         setup_Penalty_MTSP_MINMAX();
 
@@ -333,10 +337,11 @@ GainType Penalty_MTSP_MINMAX()
                     {
                         N->PFlag = 0;
                         DistanceSum += C(N, PRED(N)) - N->Pi - PRED(N)->Pi;
-                    } 
+                    }
+                    DistanceSum /= Precision;
 
                     // TODO : update P according to new DistanceSum
-                    P = MAX(P, DistanceSum / Precision);
+                    P = MAX(oldPenaltyMax, DistanceSum);
 
                     if (P > oldPenaltyMax ||
                          (P == oldPenaltyMax && CurrentGain <= 0))
@@ -358,8 +363,8 @@ GainType Penalty_MTSP_MINMAX()
             update_Penalty_MTSP_MINMAX(); //Improved!
             printf("P : %d\n", P);
             printf("CurrentPenalty : %d\n", CurrentPenalty);
-            printff("This return is wrong MAX(CurrentPenalty, P): %d\n", MAX(CurrentPenalty, P));
-            return MAX(CurrentPenalty, P); // Return is wrong, still keep the last max
+            printff("New improved penalty value MIN(CurrentPenalty, P): %d\n", MIN(CurrentPenalty, P));
+            return MIN(CurrentPenalty, P); // because now we have a better solution, smaller than the oldPenaltyMax
         }
         else
             return CurrentPenalty + (CurrentGain > 0);
