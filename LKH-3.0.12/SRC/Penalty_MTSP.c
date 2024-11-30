@@ -1,7 +1,7 @@
 #include "LKH.h"
 #include "Segment.h"
 
-#define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
+// #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
 
 #ifdef CAVA_PENALTY
 #define ARE_LINKED(N1, N2) (N1->Suc == N2 || N1->Pred == N2)
@@ -16,7 +16,7 @@ static int setup_Penalty_MTSP_MINSUM(void);        /* Compute the previous penal
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 GainType Penalty_MTSP_MINMAX_Old(void);
-static void update_Penalty_MTSP_MINMAX(void);
+static GainType update_Penalty_MTSP_MINMAX(void);
 static int setup_Node_MTSP_MINMAX(Node *);
 static int setup_Penalty_MTSP_MINMAX(void);
 
@@ -288,10 +288,10 @@ GainType Penalty_MTSP_MINMAX()
     GainType P1 = Penalty_MTSP_MINMAX_();
     int accepted1 = P1 < CurrentPenalty || (P1 == CurrentPenalty && CurrentGain > 0);
     int accepted2 = P2 < CurrentPenalty || (P2 == CurrentPenalty && CurrentGain > 0);
-    printff("Compare old and new: \n");
-    printff("-- P1: %d\n", P1);
-    printff("-- P2: %d\n", P2);
+    printff("-- P1 (New): %d\n", P1);
+    printff("-- P2 (Old): %d\n", P2);
     assert(P1 == P2);
+    // assert(abs(P1-P2) <= 1);
     assert(accepted1 == accepted2);
     assert(P1 >= 0);
     return P1;
@@ -306,7 +306,7 @@ GainType Penalty_MTSP_MINMAX()
     if (Swaps && cava_PetalsData)
     {
         printf("\nSwaps LOOP!! Swaps: %d\n", Swaps);
-        int petalCount = setup_Penalty_MTSP_MINMAX();
+        int petalCount = setup_Penalty_MTSP_MINMAX(); 
         printf("PetalCount: %d\n", petalCount);
         
         GainType DistanceSum;
@@ -317,7 +317,12 @@ GainType Penalty_MTSP_MINMAX()
             // If the max route is not changed
             // the penalty will not change
             // because oldPenaltyMax was improved (smaller)
+            printff("oldPenaltyMax = %d not improved! Return CurrentPenalty = %d\n", oldPenaltyMax, CurrentPenalty);
+            printff("-- Current Gain = %d\n", CurrentGain);
             return CurrentPenalty;
+        } else {
+            printff("oldPenaltyMax = %d and CurrentPenalty = %d\n", oldPenaltyMax, 
+            CurrentPenalty);
         }
 
         for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
@@ -353,13 +358,13 @@ GainType Penalty_MTSP_MINMAX()
                         N->PFlag = 0;
                     }
                     DistanceSum /= Precision;
-
-                    printff("\nDistanceSum: %d\n", DistanceSum);
+                    printff("\nDistanceSum (loop %d): %d\n", twice+1, DistanceSum);
                     P = MAX(P, DistanceSum);
 
                     if (P  > oldPenaltyMax ||
                          (P == oldPenaltyMax && CurrentGain <= 0))
                     {
+                        // No improvement, no need to check the rest
                         for (SwapRecord *s = si - 1; s >= SwapStack; --s)
                             s->t1->PFlag = s->t2->PFlag = s->t3->PFlag = s->t4->PFlag = 0;
 
@@ -373,16 +378,24 @@ GainType Penalty_MTSP_MINMAX()
         if (P < oldPenaltyMax ||
             (P == oldPenaltyMax && CurrentGain > 0))
         {
+            GainType CurMax = update_Penalty_MTSP_MINMAX(); //Improved!
             printff("Improved!\n");
-            update_Penalty_MTSP_MINMAX(); //Improved!
             printff("-- P: %d\n", P);
             printff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
             printff("-- CurrentPenalty: %d\n", CurrentPenalty);
-            printff("-- MIN(CurrentPenalty, P): %d\n", MIN(CurrentPenalty, P));
-            return MIN(CurrentPenalty, P);
+            if (P < CurMax) {
+                // P is not the penalty of current max route.
+                return MIN(CurMax, CurrentPenalty);
+            } else {
+                // Max route changed and P is guaranteed to be penalty of max route
+                printff("-- MIN(CurrentPenalty, P): %d\n", MIN(CurrentPenalty, P));
+                return MIN(P, CurrentPenalty);
+            }
         }
-        else
-            return CurrentPenalty;
+    else{
+            printff("No improved!\n");
+            return CurrentPenalty + (CurrentGain > 0);
+        }
     }
     else
     {
@@ -438,8 +451,6 @@ static int setup_Penalty_MTSP_MINMAX()
         }
         // if (petalCounter == 1)
         //     return 1;
-        // if (petalCounter == 1)
-        //     return 1;
     }
     // mark non-depot nodes involved in the swaps with PFlag = 1,
     // Depot nodes are marked with PFlag = 0 
@@ -473,7 +484,7 @@ static int setup_Node_MTSP_MINMAX(Node *N)
 }
 
 /* Update route data when a new improving tour is found */
-static void update_Penalty_MTSP_MINMAX()
+static GainType update_Penalty_MTSP_MINMAX()
 {
     // updates the penalty metadata for each route in the solution
     // It iterates through all routes starting from the depot
@@ -483,8 +494,9 @@ static void update_Penalty_MTSP_MINMAX()
     Node *N = Depot, *NextN;
     RouteData *CurrId;
     GainType Cost;
+    GainType CurMax;
     int Size;
-    int i = 1;
+    int i = 1;  
     printff("Update Penalty_MTSP_MINMAX (expensive func)\n");
     do
     {
@@ -508,9 +520,11 @@ static void update_Penalty_MTSP_MINMAX()
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
         CurrId->OldPenalty = Cost;
+        CurMax = MAX(Cost, CurMax);
         printff("-- New: route %d : %d\n", i++, Cost);
         CurrId->minNode = Size ? NULL : N; /* Save the adjacent depot to recognize empty routes */
     } while (N != Depot);
+    return CurMax;
 }
 
 GainType Penalty_MTSP_MINMAX_Old()
