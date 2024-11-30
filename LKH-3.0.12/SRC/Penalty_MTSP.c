@@ -2,8 +2,11 @@
 #include "Segment.h"
 
 // #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
+#define printffff if (0) printff // when investigating speedup, set to if (1)
+
 int SwapCaseCount = 0;
 #define printfff if (SwapCaseCount == -1) printff
+
 
 #ifdef CAVA_PENALTY
 #define ARE_LINKED(N1, N2) (N1->Suc == N2 || N1->Pred == N2)
@@ -67,8 +70,20 @@ static GainType Penalty_MTSP_MINMAX_();
 GainType Penalty_MTSP_MINMAX()
 {
     assert(CurrentPenalty >= 0);
-    GainType P1 = Penalty_MTSP_MINMAX_();
+
+    clock_t begin = clock();
     GainType P2 = Penalty_MTSP_MINMAX_Old();
+    clock_t end = clock();
+    double time_spent_P2 = (double)(end - begin) / CLOCKS_PER_SEC;
+
+    begin = clock();
+    GainType P1 = Penalty_MTSP_MINMAX_();
+    end = clock();
+    double time_spent_P1 = (double)(end - begin) / CLOCKS_PER_SEC;
+
+    double speedup = time_spent_P2 / time_spent_P1;
+    printffff("Speedup: %f/%f = %f\n", time_spent_P2, time_spent_P1, speedup);
+
     int accepted1 = P1 < CurrentPenalty || (P1 == CurrentPenalty && CurrentGain > 0);
     int accepted2 = P2 < CurrentPenalty || (P2 == CurrentPenalty && CurrentGain > 0);
     // printfff("Compare old and new: \n");
@@ -91,8 +106,7 @@ GainType Penalty_MTSP_MINMAX()
         // printff("%lld\n", SwapCaseCount);
         // SwapCaseCount++;
         //printfff("\nSwaps LOOP!! Swaps: %d\n", Swaps);
-        int petalCount = setup_Penalty_MTSP_MINMAX();
-        //printfff("PetalCount: %d\n", petalCount);
+        setup_Penalty_MTSP_MINMAX();
 
         GainType DistanceSum;
         int MaxOldPenaltyInSwaps = 0;
@@ -103,7 +117,7 @@ GainType Penalty_MTSP_MINMAX()
             // If the max route is not changed
             // the penalty will not change
             // because oldPenaltyMax was improved (smaller)
-            //printfff("oldPenaltyMax < CurrentPenalty. Skipped.\n");
+            printffff("oldPenaltyMax < CurrentPenalty. Skipped. ");
             for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
             {
                 for (int twice = 0; twice < 2; ++twice)
@@ -194,7 +208,7 @@ GainType Penalty_MTSP_MINMAX()
                     {
                         for (SwapRecord *s = si - 1; s >= SwapStack; --s)
                             s->t1->PFlag = s->t2->PFlag = s->t3->PFlag = s->t4->PFlag = 0;
-
+                        printffff("P: %d > oldPenaltyMax: %d. Skipped. ", P, oldPenaltyMax);
                         return CurrentPenalty + (CurrentGain > 0);
                     }
                 }
@@ -202,7 +216,7 @@ GainType Penalty_MTSP_MINMAX()
         }
         if (MaxOldPenaltyInSwaps < oldPenaltyMax)
         {
-            //printfff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped.\n", MaxOldPenaltyInSwaps, oldPenaltyMax);
+            printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped. ", MaxOldPenaltyInSwaps, oldPenaltyMax);
             return CurrentPenalty;
         }
         if (!CurrentPenalty)
@@ -210,7 +224,7 @@ GainType Penalty_MTSP_MINMAX()
         if (P < oldPenaltyMax ||
             (P == oldPenaltyMax && CurrentGain > 0))
         {
-            // printfff("Improved!\n");
+            printffff("Improved! ");
 
             // printfff("-- P: %d\n", P);
             // printfff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
@@ -218,11 +232,14 @@ GainType Penalty_MTSP_MINMAX()
             return update_Penalty_MTSP_MINMAX(); //Improved!
         }
         else
+        {
+            printffff("Not improved. ");
             return CurrentPenalty;
+        }
     }
     else
     {
-        //printfff("Using the old penalty function.\n");
+        printffff("Using the old penalty function. ");
         P = Penalty_MTSP_MINMAX_Old();
         if (P < CurrentPenalty ||
             (P == CurrentPenalty && CurrentGain > 0))
@@ -242,7 +259,6 @@ static int setup_Penalty_MTSP_MINMAX()
         Setting up the initial penalty values for the routes involved
     */
     oldPenaltyMax = 0;
-    int petalCounter = 0;
     if (CurrentPenalty) // Penalty_MTSP_MINMAX_Old() should be executed before this function
     {
         for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
@@ -252,15 +268,10 @@ static int setup_Penalty_MTSP_MINMAX()
             // the edges (t1, t2) and (t3, t4) are removed,
             // and the new edges (t1, t3) and (t2, t4) are added to form a new tour.
 
-            // was_empty_route: a route with no customers, just a depot-to-depot link
-            if ((!ARE_LINKED(t1, t2) && was_empty_route(t1, t2)) ||
-                (!ARE_LINKED(t3, t4) && was_empty_route(t3, t4)))
-            {
-                ++petalCounter;
-            }
-
-            petalCounter += setup_Node_MTSP_MINMAX(t1) + setup_Node_MTSP_MINMAX(t2) +
-                            setup_Node_MTSP_MINMAX(t3) + setup_Node_MTSP_MINMAX(t4);
+            setup_Node_MTSP_MINMAX(t1);
+            setup_Node_MTSP_MINMAX(t2);
+            setup_Node_MTSP_MINMAX(t3);
+            setup_Node_MTSP_MINMAX(t4);
         }
         // Reset petals flags for next petal counting
         for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
@@ -273,8 +284,6 @@ static int setup_Penalty_MTSP_MINMAX()
 
             t1->PetalId->flag = t2->PetalId->flag = t3->PetalId->flag = t4->PetalId->flag = 0;
         }
-        // if (petalCounter == 1)
-        //     return 1;
     }
     // mark non-depot nodes involved in the swaps with PFlag = 1,
     // Depot nodes are marked with PFlag = 0 
@@ -285,7 +294,7 @@ static int setup_Penalty_MTSP_MINMAX()
         s->t3->PFlag = !s->t3->DepotId;
         s->t4->PFlag = !s->t4->DepotId;
     }
-    return petalCounter;
+    return 0;
 }
 
 static int setup_Node_MTSP_MINMAX(Node *N)

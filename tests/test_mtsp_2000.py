@@ -18,7 +18,7 @@ def test_mtsp():
         'MAX_TRIALS': 10000,
         'SALESMEN': 4,
         'RUNS': 1,
-        'TOTAL_TIME_LIMIT': 7}
+        'TOTAL_TIME_LIMIT': 20}
     result = LK.cost_matrix(cost_matrix, params)
     cost = calculate_cost_from_cost_matrix(cost_matrix, result)
     print(cost)
