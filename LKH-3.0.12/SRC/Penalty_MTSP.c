@@ -305,11 +305,20 @@ GainType Penalty_MTSP_MINMAX()
     GainType P = 0;
     if (Swaps && cava_PetalsData)
     {
-        setup_Penalty_MTSP_MINMAX();
-        printf("IMPORTANT!! Swaps: %d\n", Swaps);
+        printf("\nSwaps LOOP!! Swaps: %d\n", Swaps);
+        int petalCount = setup_Penalty_MTSP_MINMAX();
+        printf("PetalCount: %d\n", petalCount);
+        
         GainType DistanceSum;
         Node *N;
-        setup_Penalty_MTSP_MINMAX();
+
+        if (oldPenaltyMax < CurrentPenalty)
+        {
+            // If the max route is not changed
+            // the penalty will not change
+            // because oldPenaltyMax was improved (smaller)
+            return CurrentPenalty;
+        }
 
         for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
         {
@@ -364,8 +373,8 @@ GainType Penalty_MTSP_MINMAX()
         if (P < oldPenaltyMax ||
             (P == oldPenaltyMax && CurrentGain > 0))
         {
-            update_Penalty_MTSP_MINMAX(); //Improved!
             printff("Improved!\n");
+            update_Penalty_MTSP_MINMAX(); //Improved!
             printff("-- P: %d\n", P);
             printff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
             printff("-- CurrentPenalty: %d\n", CurrentPenalty);
@@ -373,7 +382,7 @@ GainType Penalty_MTSP_MINMAX()
             return MIN(CurrentPenalty, P);
         }
         else
-            return CurrentPenalty + (CurrentGain > 0);
+            return CurrentPenalty;
     }
     else
     {
@@ -455,6 +464,7 @@ static int setup_Node_MTSP_MINMAX(Node *N)
     if (!N->PetalId->flag) // if the Node's Route has not been Processed
     {
         oldPenaltyMax = MAX(oldPenaltyMax, N->PetalId->OldPenalty); // update the oldPenaltyMax
+        printff("Route involved: %d : %d\n", N->PetalId - cava_PetalsData, N->PetalId->OldPenalty);
         N->PetalId->flag = 1; // Mark Route as Processed
         // returns 1 if the node is not a depot (indicating a valid route), otherwise it returns 0
         return (N->PetalId != cava_PetalsData); // Depots have PetalId_index == 0
@@ -475,7 +485,7 @@ static void update_Penalty_MTSP_MINMAX()
     GainType Cost;
     int Size;
     int i = 1;
-    printff("Update Penalty_MTSP_MINMAX\n");
+    printff("Update Penalty_MTSP_MINMAX (expensive func)\n");
     do
     {
         // Update the penalty metadata for the current route
