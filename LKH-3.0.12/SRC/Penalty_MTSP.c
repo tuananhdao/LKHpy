@@ -4,24 +4,18 @@
 // #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
 #define printffff if (0) printff // when investigating speedup, set to if (1)
 
-int SwapCaseCount = 0;
-#define printfff if (SwapCaseCount == -1) printff
-
-
 #ifdef CAVA_PENALTY
-#define ARE_LINKED(N1, N2) (N1->Suc == N2 || N1->Pred == N2)
 static GainType oldPenaltyMax;
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 GainType Penalty_MTSP_MINMAX_Old(void);
 static GainType update_Penalty_MTSP_MINMAX(void);
-static int setup_Node_MTSP_MINMAX(Node *);
-static int setup_Penalty_MTSP_MINMAX(void);
+static void setup_Node_MTSP_MINMAX(Node *);
+static void setup_Penalty_MTSP_MINMAX(void);
 
-static int was_empty_route(Node *, Node *); /* Used to test *only once* if a removed edge (from a 2opt move) was the edge of an empty 
-                                                route (depot->depot). After the first check, it return 0 until the relative
-                                                flags is reseted (To avoid counting multiple times the same route).*/
+int SwapCaseCount = 0;
+#define printfff if (SwapCaseCount == -1) printff
 #endif
 
 GainType Penalty_MTSP_MINSUM()
@@ -70,19 +64,8 @@ static GainType Penalty_MTSP_MINMAX_();
 GainType Penalty_MTSP_MINMAX()
 {
     assert(CurrentPenalty >= 0);
-
-    clock_t begin = clock();
     GainType P2 = Penalty_MTSP_MINMAX_Old();
-    clock_t end = clock();
-    double time_spent_P2 = (double)(end - begin) / CLOCKS_PER_SEC;
-
-    begin = clock();
     GainType P1 = Penalty_MTSP_MINMAX_();
-    end = clock();
-    double time_spent_P1 = (double)(end - begin) / CLOCKS_PER_SEC;
-
-    double speedup = time_spent_P2 / time_spent_P1;
-    printffff("Speedup: %f/%f = %f\n", time_spent_P2, time_spent_P1, speedup);
 
     int accepted1 = P1 < CurrentPenalty || (P1 == CurrentPenalty && CurrentGain > 0);
     int accepted2 = P2 < CurrentPenalty || (P2 == CurrentPenalty && CurrentGain > 0);
@@ -114,6 +97,8 @@ GainType Penalty_MTSP_MINMAX()
 
         if (oldPenaltyMax < CurrentPenalty)
         {
+            // return CurrentPenalty; // this will be much faster but result in a different solution
+
             // If the max route is not changed
             // the penalty will not change
             // because oldPenaltyMax was improved (smaller)
@@ -253,7 +238,7 @@ GainType Penalty_MTSP_MINMAX()
 }
 
 /* Returns 1 if only one route is involved in the current move */
-static int setup_Penalty_MTSP_MINMAX()
+static void setup_Penalty_MTSP_MINMAX()
 {
     /*
         Setting up the initial penalty values for the routes involved
@@ -294,10 +279,9 @@ static int setup_Penalty_MTSP_MINMAX()
         s->t3->PFlag = !s->t3->DepotId;
         s->t4->PFlag = !s->t4->DepotId;
     }
-    return 0;
 }
 
-static int setup_Node_MTSP_MINMAX(Node *N)
+static void setup_Node_MTSP_MINMAX(Node *N)
 {
     /*
     The role of setup_Node_CVRP() is to ensure that each route's penalty is counted only once
@@ -310,10 +294,7 @@ static int setup_Node_MTSP_MINMAX(Node *N)
         oldPenaltyMax = MAX(oldPenaltyMax, N->PetalId->OldPenalty); // update the oldPenaltyMax
         //printfff("Route involved: %d : %d\n", N->PetalId - cava_PetalsData, N->PetalId->OldPenalty);
         N->PetalId->flag = 1; // Mark Route as Processed
-        // returns 1 if the node is not a depot (indicating a valid route), otherwise it returns 0
-        return (N->PetalId != cava_PetalsData); // Depots have PetalId == 0
     }
-    return 0;
 }
 
 /* Update route data when a new improving tour is found */
@@ -321,28 +302,24 @@ static GainType update_Penalty_MTSP_MINMAX()
 {
     // updates the penalty metadata for each route in the solution
     // It iterates through all routes starting from the depot
-    // and updates the OldPenalty and minNode fields in the RouteData structure for each route.
+    // and updates the OldPenalty in the RouteData structure for each route.
     // not the entire solution / max(all routes)
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
     Node *N = Depot, *NextN;
     RouteData *CurrId;
     GainType Cost;
     GainType MaxCost;
-    int Size;
     int i = 1;
     // printfff("Update Penalty_MTSP_MINMAX (expensive func)\n");
     printfff(""); // the code doesn't work without this line
     do
     {
-        // Update the penalty metadata for the current route
-        Size = 0;
         Cost = 0;
         N->PetalId = cava_PetalsData; // depots point to 0 cell
         CurrId = cava_PetalsData + N->DepotId;
         CurrId->OldPenalty = 0;
         
         do {
-            ++Size;
             N->PetalId = CurrId;
             NextN = Forward ? SUCC(N) : PREDD(N);
             if (NextN->Id > DimensionSaved)
@@ -355,18 +332,8 @@ static GainType update_Penalty_MTSP_MINMAX()
         MaxCost = MAX(MaxCost, Cost);
         // printfff("-- New: route %d : %d\n", i++, Cost);
         printfff(""); // the code doesn't work without this line
-        CurrId->minNode = Size ? NULL : N; /* Save the adjacent depot to recognize empty routes */
     } while (N != Depot);
     return MaxCost;
-}
-
-static int was_empty_route(Node *N1, Node *N2)
-{
-    // a route with no customers, just a depot-to-depot link
-    int *f1 = &cava_PetalsData[N1->DepotId].flag;
-    int *f2 = &cava_PetalsData[N2->DepotId].flag;
-    return (!*f1 && (*f1 |= (cava_PetalsData[N1->DepotId].minNode == N2))) ||
-           (!*f2 && (*f2 |= (cava_PetalsData[N2->DepotId].minNode == N1)));
 }
 
 GainType Penalty_MTSP_MINMAX_Old()

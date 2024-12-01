@@ -691,7 +691,6 @@ typedef struct _RouteData
 {
     int flag;
     GainType OldPenalty;
-    GainType CandPenalty;
     Node *minNode;
 } RouteData;
 extern RouteData *cava_PetalsData;
