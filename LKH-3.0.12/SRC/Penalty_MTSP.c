@@ -203,8 +203,6 @@ static GainType calculate_DistanceSum(Node *initN, int Forward)
     Node *N = initN, *NextN;
     N->PFlag = 0;
 
-    RouteData *CurrId = cava_PetalsData + N->DepotId; 
-
     //Forward
     while (N->DepotId == 0)
     {
