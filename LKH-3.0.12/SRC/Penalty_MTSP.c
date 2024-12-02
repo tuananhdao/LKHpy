@@ -93,13 +93,25 @@ GainType Penalty_MTSP_MINMAX()
         setup_Penalty_MTSP_MINMAX();
 
         GainType DistanceSum;
-        int MaxOldPenaltyInSwaps = 0;
+        GainType MaxOldPenaltyInSwaps = 0;
         Node *N;
+
+        for (int i = 1; i < Salesmen + 1; i++)
+        {
+            if (cava_PetalsData[i].flag)
+            {
+                MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, cava_PetalsData[i].OldPenalty);
+                cava_PetalsData[i].flag = 0;
+            }
+        }
+        if (MaxOldPenaltyInSwaps < oldPenaltyMax)
+        {
+            printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped.\n", MaxOldPenaltyInSwaps, oldPenaltyMax);
+            return CurrentPenalty;
+        }
 
         if (oldPenaltyMax < CurrentPenalty)
         {
-            // return CurrentPenalty; // this will be much faster but result in a different solution
-
             // If the max route is not changed
             // the penalty will not change
             // because oldPenaltyMax was improved (smaller)
@@ -123,9 +135,7 @@ GainType Penalty_MTSP_MINMAX()
                         //Forward
                         while (N->DepotId == 0)
                         {
-                            MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
                             DistanceSum += C(N, SUC(N)) - N->Pi - SUC(N)->Pi;
-                            // printff("%d -> %d: %d\n", N->Id, SUC(N)->Id, (C(N, SUC(N)) - N->Pi - SUC(N)->Pi)/Precision);
                             N = SUC(N);
                             N->PFlag = 0;
                         }
@@ -133,9 +143,7 @@ GainType Penalty_MTSP_MINMAX()
                         N = savedN;
                         while (N->DepotId == 0)
                         {
-                            MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
                             DistanceSum += C(N, PRED(N)) - N->Pi - PRED(N)->Pi;
-                            // printff("%d -> %d: %d\n", PRED(N)->Id, N->Id, (C(N, PRED(N)) - N->Pi - PRED(N)->Pi)/Precision);
                             N = PRED(N);
                             N->PFlag = 0;
                         }
@@ -168,7 +176,6 @@ GainType Penalty_MTSP_MINMAX()
                     //Forward
                     while (N->DepotId == 0)
                     {
-                        MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
                         DistanceSum += C(N, SUC(N)) - N->Pi - SUC(N)->Pi;
                         // printff("%d -> %d: %d\n", N->Id, SUC(N)->Id, (C(N, SUC(N)) - N->Pi - SUC(N)->Pi)/Precision);
                         N = SUC(N);
@@ -178,7 +185,6 @@ GainType Penalty_MTSP_MINMAX()
                     N = savedN;
                     while (N->DepotId == 0)
                     {
-                        MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
                         DistanceSum += C(N, PRED(N)) - N->Pi - PRED(N)->Pi;
                         // printff("%d -> %d: %d\n", PRED(N)->Id, N->Id, (C(N, PRED(N)) - N->Pi - PRED(N)->Pi)/Precision);
                         N = PRED(N);
@@ -200,28 +206,15 @@ GainType Penalty_MTSP_MINMAX()
                 }
             }
         }
-        if (MaxOldPenaltyInSwaps < oldPenaltyMax)
-        {
-            printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped.\n", MaxOldPenaltyInSwaps, oldPenaltyMax);
-            return CurrentPenalty;
-        }
+
         if (!CurrentPenalty)
             return P;
-        if (P < oldPenaltyMax ||
-            (P == oldPenaltyMax && CurrentGain > 0))
-        {
-            printffff("Improved!\n");
 
-            printffff("-- P: %d\n", P);
-            printffff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
-            printffff("-- CurrentPenalty: %d\n", CurrentPenalty);
-            return update_Penalty_MTSP_MINMAX(); //Improved!
-        }
-        else
-        {
-            printffff("Not improved.\n");
-            return CurrentPenalty;
-        }
+        printffff("Improved!\n");
+        printffff("-- P: %d\n", P);
+        printffff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
+        printffff("-- CurrentPenalty: %d\n", CurrentPenalty);
+        return update_Penalty_MTSP_MINMAX(); //Improved!
     }
     else
     {
@@ -279,6 +272,9 @@ static void setup_Penalty_MTSP_MINMAX()
         s->t2->PFlag = !s->t2->DepotId;
         s->t3->PFlag = !s->t3->DepotId;
         s->t4->PFlag = !s->t4->DepotId;
+
+        // mark the involved routes with flag = 1 for the early exit MaxOldPenaltyInSwaps < oldPenaltyMax
+        s->t1->PetalId->flag = s->t2->PetalId->flag = s->t3->PetalId->flag = s->t4->PetalId->flag = 1;
     }
 }
 
