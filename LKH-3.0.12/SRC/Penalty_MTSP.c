@@ -1,7 +1,7 @@
 #include "LKH.h"
 #include "Segment.h"
 
-// #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
+#define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
 #define printffff if (0) printff // when investigating speedup, set to if (1)
 
 #ifdef CAVA_PENALTY
