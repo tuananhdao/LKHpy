@@ -69,9 +69,10 @@ GainType Penalty_MTSP_MINMAX()
 
     int accepted1 = P1 < CurrentPenalty || (P1 == CurrentPenalty && CurrentGain > 0);
     int accepted2 = P2 < CurrentPenalty || (P2 == CurrentPenalty && CurrentGain > 0);
-    // printfff("Compare old and new: \n");
-    // printfff("-- P1: %d\n", P1);
-    // printfff("-- P2: %d\n", P2);
+    // if (P1 != P2) {
+    //     printffff("-- P1 (new): %d\n", P1);
+    //     printffff("-- P2 (old): %d\n", P2);
+    // }
     assert(P1 == P2);
     assert(accepted1 == accepted2);
     assert(P1 >= 0);
@@ -102,7 +103,7 @@ GainType Penalty_MTSP_MINMAX()
             // If the max route is not changed
             // the penalty will not change
             // because oldPenaltyMax was improved (smaller)
-            printffff("oldPenaltyMax < CurrentPenalty. Skipped. ");
+            printffff("oldPenaltyMax < CurrentPenalty. Skipped.\n");
             for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
             {
                 for (int twice = 0; twice < 2; ++twice)
@@ -193,7 +194,7 @@ GainType Penalty_MTSP_MINMAX()
                     {
                         for (SwapRecord *s = si - 1; s >= SwapStack; --s)
                             s->t1->PFlag = s->t2->PFlag = s->t3->PFlag = s->t4->PFlag = 0;
-                        printffff("P: %d > oldPenaltyMax: %d. Skipped. ", P, oldPenaltyMax);
+                        printffff("P: %d > oldPenaltyMax: %d. Skipped.\n", P, oldPenaltyMax);
                         return CurrentPenalty + (CurrentGain > 0);
                     }
                 }
@@ -201,7 +202,7 @@ GainType Penalty_MTSP_MINMAX()
         }
         if (MaxOldPenaltyInSwaps < oldPenaltyMax)
         {
-            printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped. ", MaxOldPenaltyInSwaps, oldPenaltyMax);
+            printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped.\n", MaxOldPenaltyInSwaps, oldPenaltyMax);
             return CurrentPenalty;
         }
         if (!CurrentPenalty)
@@ -209,22 +210,22 @@ GainType Penalty_MTSP_MINMAX()
         if (P < oldPenaltyMax ||
             (P == oldPenaltyMax && CurrentGain > 0))
         {
-            printffff("Improved! ");
+            printffff("Improved!\n");
 
-            // printfff("-- P: %d\n", P);
-            // printfff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
-            // printfff("-- CurrentPenalty: %d\n", CurrentPenalty);
+            printffff("-- P: %d\n", P);
+            printffff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
+            printffff("-- CurrentPenalty: %d\n", CurrentPenalty);
             return update_Penalty_MTSP_MINMAX(); //Improved!
         }
         else
         {
-            printffff("Not improved. ");
+            printffff("Not improved.\n");
             return CurrentPenalty;
         }
     }
     else
     {
-        printffff("Using the old penalty function. ");
+        printffff("Using the old penalty function.\n");
         P = Penalty_MTSP_MINMAX_Old();
         if (P < CurrentPenalty ||
             (P == CurrentPenalty && CurrentGain > 0))
@@ -308,10 +309,9 @@ static GainType update_Penalty_MTSP_MINMAX()
     Node *N = Depot, *NextN;
     RouteData *CurrId;
     GainType Cost;
-    GainType MaxCost;
+    GainType MaxCost = 0;
     int i = 1;
     // printfff("Update Penalty_MTSP_MINMAX (expensive func)\n");
-    printfff(""); // the code doesn't work without this line
     do
     {
         Cost = 0;
@@ -331,7 +331,6 @@ static GainType update_Penalty_MTSP_MINMAX()
         CurrId->OldPenalty = Cost;
         MaxCost = MAX(MaxCost, Cost);
         // printfff("-- New: route %d : %d\n", i++, Cost);
-        printfff(""); // the code doesn't work without this line
     } while (N != Depot);
     return MaxCost;
 }
