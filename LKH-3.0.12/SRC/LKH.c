@@ -203,6 +203,11 @@ CostFunction C;
 #endif
 int* cava_ForbiddenCacheSig;
 
+#ifdef CAVA_PENALTY
+RouteData *cava_PetalsData;
+Node **cava_NodeCache;
+#endif
+
 MergeTourFunction MergeWithTour;
 
 /* Genetic.h variables */

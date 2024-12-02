@@ -1,6 +1,23 @@
 #include "LKH.h"
 #include "Segment.h"
 
+// #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
+#define printffff if (0) printff // when investigating speedup, set to if (1)
+
+#ifdef CAVA_PENALTY
+static GainType oldPenaltyMax;
+
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+GainType Penalty_MTSP_MINMAX_Old(void);
+static GainType update_Penalty_MTSP_MINMAX(void);
+static void setup_Node_MTSP_MINMAX(Node *);
+static void setup_Penalty_MTSP_MINMAX(void);
+
+int SwapCaseCount = 0;
+#define printfff if (SwapCaseCount == -1) printff
+#endif
+
 GainType Penalty_MTSP_MINSUM()
 {
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
@@ -40,38 +57,319 @@ GainType Penalty_MTSP_MINSUM()
     return P;
 }
 
+#ifdef CAVA_PENALTY
+
+#ifdef REDUNDANT_CHECK
+static GainType Penalty_MTSP_MINMAX_();
 GainType Penalty_MTSP_MINMAX()
 {
+    assert(CurrentPenalty >= 0);
+    GainType P2 = Penalty_MTSP_MINMAX_Old();
+    GainType P1 = Penalty_MTSP_MINMAX_();
+
+    int accepted1 = P1 < CurrentPenalty || (P1 == CurrentPenalty && CurrentGain > 0);
+    int accepted2 = P2 < CurrentPenalty || (P2 == CurrentPenalty && CurrentGain > 0);
+    // if (P1 != P2) {
+    //     printffff("-- P1 (new): %d\n", P1);
+    //     printffff("-- P2 (old): %d\n", P2);
+    // }
+    assert(P1 == P2);
+    assert(accepted1 == accepted2);
+    assert(P1 >= 0);
+    return P1;
+}
+
+GainType Penalty_MTSP_MINMAX_()
+#else
+GainType Penalty_MTSP_MINMAX()
+#endif
+{
+    GainType P = 0;
+    if (Swaps && cava_PetalsData)
+    {
+        // printff("%lld\n", SwapCaseCount);
+        // SwapCaseCount++;
+        //printfff("\nSwaps LOOP!! Swaps: %d\n", Swaps);
+        setup_Penalty_MTSP_MINMAX();
+
+        GainType DistanceSum;
+        int MaxOldPenaltyInSwaps = 0;
+        Node *N;
+
+        if (oldPenaltyMax < CurrentPenalty)
+        {
+            // return CurrentPenalty; // this will be much faster but result in a different solution
+
+            // If the max route is not changed
+            // the penalty will not change
+            // because oldPenaltyMax was improved (smaller)
+            printffff("oldPenaltyMax < CurrentPenalty. Skipped.\n");
+            for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
+            {
+                for (int twice = 0; twice < 2; ++twice)
+                {
+                    if (twice > 0)
+                        N = si->t2->PFlag ? si->t2 : si->t3;
+                    else
+                        N = si->t1->PFlag ? si->t1 : si->t4;
+                    if (N->PFlag)
+                    {
+                        // Calculate the penalty for the route
+                        // Forward
+                        DistanceSum = 0;
+                        Node *savedN = N;
+                        N->PFlag = 0;
+
+                        //Forward
+                        while (N->DepotId == 0)
+                        {
+                            MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
+                            DistanceSum += C(N, SUC(N)) - N->Pi - SUC(N)->Pi;
+                            // printff("%d -> %d: %d\n", N->Id, SUC(N)->Id, (C(N, SUC(N)) - N->Pi - SUC(N)->Pi)/Precision);
+                            N = SUC(N);
+                            N->PFlag = 0;
+                        }
+                        //Backward
+                        N = savedN;
+                        while (N->DepotId == 0)
+                        {
+                            MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
+                            DistanceSum += C(N, PRED(N)) - N->Pi - PRED(N)->Pi;
+                            // printff("%d -> %d: %d\n", PRED(N)->Id, N->Id, (C(N, PRED(N)) - N->Pi - PRED(N)->Pi)/Precision);
+                            N = PRED(N);
+                            N->PFlag = 0;
+                        }
+                        DistanceSum /= Precision;
+
+                        if (DistanceSum > CurrentPenalty)
+                            return CurrentPenalty + (CurrentGain > 0);
+                    }
+                }
+            }
+            return CurrentPenalty;
+        }
+
+        for (SwapRecord *si = SwapStack + Swaps - 1; si >= SwapStack; --si)
+        {
+            for (int twice = 0; twice < 2; ++twice)
+            {
+                if (twice > 0)
+                    N = si->t2->PFlag ? si->t2 : si->t3;
+                else
+                    N = si->t1->PFlag ? si->t1 : si->t4;
+                if (N->PFlag)
+                {
+                    // Calculate the penalty for the route
+                    // Forward
+                    DistanceSum = 0;
+                    Node *savedN = N;
+                    N->PFlag = 0;
+
+                    //Forward
+                    while (N->DepotId == 0)
+                    {
+                        MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
+                        DistanceSum += C(N, SUC(N)) - N->Pi - SUC(N)->Pi;
+                        // printff("%d -> %d: %d\n", N->Id, SUC(N)->Id, (C(N, SUC(N)) - N->Pi - SUC(N)->Pi)/Precision);
+                        N = SUC(N);
+                        N->PFlag = 0;
+                    }
+                    //Backward
+                    N = savedN;
+                    while (N->DepotId == 0)
+                    {
+                        MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
+                        DistanceSum += C(N, PRED(N)) - N->Pi - PRED(N)->Pi;
+                        // printff("%d -> %d: %d\n", PRED(N)->Id, N->Id, (C(N, PRED(N)) - N->Pi - PRED(N)->Pi)/Precision);
+                        N = PRED(N);
+                        N->PFlag = 0;
+                    }
+                    DistanceSum /= Precision;
+
+                    //printfff("DistanceSum: %d (or %d) -> %d\n", savedN->PetalId->OldPenalty, N->PetalId->OldPenalty, DistanceSum);
+                    P = MAX(P, DistanceSum);
+
+                    if (P > oldPenaltyMax ||
+                         (P == oldPenaltyMax && CurrentGain <= 0))
+                    {
+                        for (SwapRecord *s = si - 1; s >= SwapStack; --s)
+                            s->t1->PFlag = s->t2->PFlag = s->t3->PFlag = s->t4->PFlag = 0;
+                        printffff("P: %d > oldPenaltyMax: %d. Skipped.\n", P, oldPenaltyMax);
+                        return CurrentPenalty + (CurrentGain > 0);
+                    }
+                }
+            }
+        }
+        if (MaxOldPenaltyInSwaps < oldPenaltyMax)
+        {
+            printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped.\n", MaxOldPenaltyInSwaps, oldPenaltyMax);
+            return CurrentPenalty;
+        }
+        if (!CurrentPenalty)
+            return P;
+        if (P < oldPenaltyMax ||
+            (P == oldPenaltyMax && CurrentGain > 0))
+        {
+            printffff("Improved!\n");
+
+            printffff("-- P: %d\n", P);
+            printffff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
+            printffff("-- CurrentPenalty: %d\n", CurrentPenalty);
+            return update_Penalty_MTSP_MINMAX(); //Improved!
+        }
+        else
+        {
+            printffff("Not improved.\n");
+            return CurrentPenalty;
+        }
+    }
+    else
+    {
+        printffff("Using the old penalty function.\n");
+        P = Penalty_MTSP_MINMAX_Old();
+        if (P < CurrentPenalty ||
+            (P == CurrentPenalty && CurrentGain > 0))
+        {
+            if (!cava_PetalsData)
+                cava_PetalsData = (RouteData *)calloc(Salesmen + 1, sizeof(RouteData));
+            update_Penalty_MTSP_MINMAX();
+        }
+        return P;
+    }
+}
+
+/* Returns 1 if only one route is involved in the current move */
+static void setup_Penalty_MTSP_MINMAX()
+{
+    /*
+        Setting up the initial penalty values for the routes involved
+    */
+    oldPenaltyMax = 0;
+    if (CurrentPenalty) // Penalty_MTSP_MINMAX_Old() should be executed before this function
+    {
+        for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
+        {
+            // If a move has involved the edge of an empty route an additional empty one needs to be counted
+            Node *t1 = s->t1, *t2 = s->t2, *t3 = s->t3, *t4 = s->t4;
+            // the edges (t1, t2) and (t3, t4) are removed,
+            // and the new edges (t1, t3) and (t2, t4) are added to form a new tour.
+
+            setup_Node_MTSP_MINMAX(t1);
+            setup_Node_MTSP_MINMAX(t2);
+            setup_Node_MTSP_MINMAX(t3);
+            setup_Node_MTSP_MINMAX(t4);
+        }
+        // Reset petals flags for next petal counting
+        for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
+        {
+            Node *t1 = s->t1, *t2 = s->t2, *t3 = s->t3, *t4 = s->t4;
+            int d1 = t1->DepotId, d2 = t2->DepotId, d3 = t3->DepotId, d4 = t4->DepotId;
+
+            cava_PetalsData[d1].flag = cava_PetalsData[d2].flag =
+                cava_PetalsData[d3].flag = cava_PetalsData[d4].flag = 0;
+
+            t1->PetalId->flag = t2->PetalId->flag = t3->PetalId->flag = t4->PetalId->flag = 0;
+        }
+    }
+    // mark non-depot nodes involved in the swaps with PFlag = 1,
+    // Depot nodes are marked with PFlag = 0 
+    for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
+    {
+        s->t1->PFlag = !s->t1->DepotId;
+        s->t2->PFlag = !s->t2->DepotId;
+        s->t3->PFlag = !s->t3->DepotId;
+        s->t4->PFlag = !s->t4->DepotId;
+    }
+}
+
+static void setup_Node_MTSP_MINMAX(Node *N)
+{
+    /*
+    The role of setup_Node_CVRP() is to ensure that each route's penalty is counted only once
+    during the setup phase of the penalty calculation. This helps in accurately computing
+    the previous penalty sum (oldPenaltyMax) for the routes involved in the current move,
+    which is essential for determining if the new solution is an improvement.
+    */
+    if (!N->PetalId->flag) // check if the Node's Route has been Processed
+    {
+        oldPenaltyMax = MAX(oldPenaltyMax, N->PetalId->OldPenalty); // update the oldPenaltyMax
+        //printfff("Route involved: %d : %d\n", N->PetalId - cava_PetalsData, N->PetalId->OldPenalty);
+        N->PetalId->flag = 1; // Mark Route as Processed
+    }
+}
+
+/* Update route data when a new improving tour is found */
+static GainType update_Penalty_MTSP_MINMAX()
+{
+    // updates the penalty metadata for each route in the solution
+    // It iterates through all routes starting from the depot
+    // and updates the OldPenalty in the RouteData structure for each route.
+    // not the entire solution / max(all routes)
+    int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
+    Node *N = Depot, *NextN;
+    RouteData *CurrId;
+    GainType Cost;
+    GainType MaxCost = 0;
+    int i = 1;
+    // printfff("Update Penalty_MTSP_MINMAX (expensive func)\n");
+    do
+    {
+        Cost = 0;
+        N->PetalId = cava_PetalsData; // depots point to 0 cell
+        CurrId = cava_PetalsData + N->DepotId;
+        CurrId->OldPenalty = 0;
+        
+        do {
+            N->PetalId = CurrId;
+            NextN = Forward ? SUCC(N) : PREDD(N);
+            if (NextN->Id > DimensionSaved)
+                NextN = Forward ? SUCC(NextN) : PREDD(NextN);
+            Cost += C(N, NextN) - N->Pi - NextN->Pi;
+            // printfff("%d -> %d: %d\n", N->Id, NextN->Id, (C(N, NextN) - N->Pi - NextN->Pi)/Precision);
+        } while ((N = NextN)->DepotId == 0);
+        Cost /= Precision;
+        CurrId->OldPenalty = Cost;
+        MaxCost = MAX(MaxCost, Cost);
+        // printfff("-- New: route %d : %d\n", i++, Cost);
+    } while (N != Depot);
+    return MaxCost;
+}
+
+GainType Penalty_MTSP_MINMAX_Old()
+#else
+GainType Penalty_MTSP_MINMAX()
+#endif
+{
+    // Forward is true if the next node is not the first node of the next route
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
     static Node *StartRoute = 0;
     Node *N, *NextN, *CurrentRoute;
-    GainType Cost, MaxCost = MINUS_INFINITY;
+    GainType Cost, P = MINUS_INFINITY;
 
-    if (!StartRoute)
-        StartRoute = Depot;
-    if (StartRoute->Id > DimensionSaved)
-        StartRoute -= DimensionSaved;
+    StartRoute = Depot;
     N = StartRoute;
     do {
         Cost = 0;
         CurrentRoute = N;
         do {
             NextN = Forward ? SUCC(N) : PREDD(N);
-            Cost += C(N, NextN) - N->Pi - NextN->Pi;
             if (NextN->Id > DimensionSaved)
                 NextN = Forward ? SUCC(NextN) : PREDD(NextN);
+            // Cost is the sum of the distances between the nodes in the route
+            // minus the Pi values of the nodes
+            Cost += C(N, NextN) - N->Pi - NextN->Pi;
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
-        if (Cost > MaxCost) {
+        if (Cost > P) {
             if (Cost > CurrentPenalty ||
                 (Cost == CurrentPenalty && CurrentGain <= 0)) {
-                StartRoute = CurrentRoute;
                 return CurrentPenalty + (CurrentGain > 0);
             }
-            MaxCost = Cost;
+            P = Cost;
         }
     } while (N != StartRoute);
-    return MaxCost;
+    // printfff("_Old() all routes : %d\n", P);
+    return P;
 }
 
 GainType Penalty_MTSP_MINMAX_SIZE()
