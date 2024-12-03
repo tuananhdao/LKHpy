@@ -184,12 +184,17 @@ GainType Penalty_MTSP_MINMAX()
         // Forward is true if the next node is not the first node of the next route
         int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
         Node *N = Depot, *NextN;
-        Node *CurrentRoute;
         GainType Cost, P = MINUS_INFINITY;
+        RouteData *CurrId;
+        if (!cava_PetalsData)
+            cava_PetalsData = (RouteData *)calloc(Salesmen + 1, sizeof(RouteData));
         do {
             Cost = 0;
-            CurrentRoute = N;
+            N->PetalId = cava_PetalsData; // depots point to 0 cell
+            CurrId = cava_PetalsData + N->DepotId;
+            CurrId->OldPenalty = 0;
             do {
+                N->PetalId = CurrId;
                 NextN = Forward ? SUCC(N) : PREDD(N);
                 if (NextN->Id > DimensionSaved)
                     NextN = Forward ? SUCC(NextN) : PREDD(NextN);
@@ -198,6 +203,7 @@ GainType Penalty_MTSP_MINMAX()
                 Cost += C(N, NextN) - N->Pi - NextN->Pi;
             } while ((N = NextN)->DepotId == 0);
             Cost /= Precision;
+            CurrId->OldPenalty = Cost;
             if (Cost > P) {
                 if (Cost > CurrentPenalty ||
                     (Cost == CurrentPenalty && CurrentGain <= 0)) {
@@ -208,29 +214,20 @@ GainType Penalty_MTSP_MINMAX()
             }
         } while (N != Depot);
         
-        if (P < CurrentPenalty ||
-            (P == CurrentPenalty && CurrentGain > 0))
-        {
-            if (!cava_PetalsData)
-                cava_PetalsData = (RouteData *)calloc(Salesmen + 1, sizeof(RouteData));
+        if (P >= CurrentPenalty && 
+            !(P == CurrentPenalty && CurrentGain > 0)) {
+            free(cava_PetalsData); 
+            cava_PetalsData = 0;
             N = Depot;
-            RouteData *CurrId;
-            int i = 1;
             do
             {
-                Cost = 0;
-                N->PetalId = cava_PetalsData; // depots point to 0 cell
-                CurrId = cava_PetalsData + N->DepotId;
-                CurrId->OldPenalty = 0;
+                N->PetalId = NULL;
                 do {
-                    N->PetalId = CurrId;
+                    N->PetalId = NULL;
                     NextN = Forward ? SUCC(N) : PREDD(N);
                     if (NextN->Id > DimensionSaved)
                         NextN = Forward ? SUCC(NextN) : PREDD(NextN);
-                    Cost += C(N, NextN) - N->Pi - NextN->Pi;
                 } while ((N = NextN)->DepotId == 0);
-                Cost /= Precision;
-                CurrId->OldPenalty = Cost;
             } while (N != Depot);
         }
         return P;
