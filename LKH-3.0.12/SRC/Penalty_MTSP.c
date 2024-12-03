@@ -11,6 +11,7 @@ static GainType oldPenaltyMax;
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 GainType Penalty_MTSP_MINMAX_Old(void);
 static GainType update_Penalty_MTSP_MINMAX(void);
+static GainType update_Penalty_MTSP_MINMAX_Old(void);
 static void setup_Node_MTSP_MINMAX(Node *);
 static void setup_Penalty_MTSP_MINMAX(void);
 static GainType calculate_DistanceSum(Node *initN, int Forward);
@@ -181,15 +182,9 @@ GainType Penalty_MTSP_MINMAX()
     else
     {
         printffff("Using the old penalty function.\n");
-        P = Penalty_MTSP_MINMAX_Old();
-        if (P < CurrentPenalty ||
-            (P == CurrentPenalty && CurrentGain > 0))
-        {
-            if (!cava_PetalsData)
-                cava_PetalsData = (RouteData *)calloc(Salesmen + 1, sizeof(RouteData));
-            update_Penalty_MTSP_MINMAX();
-        }
-        return P;
+        if (!cava_PetalsData)
+            cava_PetalsData = (RouteData *)calloc(Salesmen + 1, sizeof(RouteData));
+        return update_Penalty_MTSP_MINMAX_Old();
     }
 }
 
@@ -313,6 +308,42 @@ static GainType update_Penalty_MTSP_MINMAX()
     return MaxCost;
 }
 
+static GainType update_Penalty_MTSP_MINMAX_Old()
+{
+    // Forward is true if the next node is not the first node of the next route
+    int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
+    Node *N = Depot, *NextN;
+    GainType Cost, MaxCost = MINUS_INFINITY;
+    RouteData *CurrId;
+    do {
+        Cost = 0;
+        N->PetalId = cava_PetalsData; // depots point to 0 cell
+        CurrId = cava_PetalsData + N->DepotId;
+        CurrId->OldPenalty = 0;
+        do {
+            N->PetalId = CurrId;
+            NextN = Forward ? SUCC(N) : PREDD(N);
+            if (NextN->Id > DimensionSaved)
+                NextN = Forward ? SUCC(NextN) : PREDD(NextN);
+            Cost += C(N, NextN) - N->Pi - NextN->Pi;
+        } while ((N = NextN)->DepotId == 0);
+        Cost /= Precision;
+        CurrId->OldPenalty = Cost;
+        if (Cost > MaxCost) {
+            if (Cost > CurrentPenalty ||
+                (Cost == CurrentPenalty && CurrentGain <= 0)) {
+                MaxCost = CurrentPenalty + (CurrentGain > 0);
+                // break; // maybe wrong?
+            }
+            else
+            {
+                MaxCost = Cost;
+            }
+        }
+    } while (N != Depot);
+    return MaxCost;
+}
+
 GainType Penalty_MTSP_MINMAX_Old()
 #else
 GainType Penalty_MTSP_MINMAX()
@@ -321,14 +352,11 @@ GainType Penalty_MTSP_MINMAX()
     // Forward is true if the next node is not the first node of the next route
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
     static Node *StartRoute = 0;
-    Node *N, *NextN, *CurrentRoute;
-    GainType Cost, P = MINUS_INFINITY;
+    Node *N = Depot, *NextN;
+    GainType Cost, MaxCost = MINUS_INFINITY;
 
-    StartRoute = Depot;
-    N = StartRoute;
     do {
         Cost = 0;
-        CurrentRoute = N;
         do {
             NextN = Forward ? SUCC(N) : PREDD(N);
             if (NextN->Id > DimensionSaved)
@@ -338,16 +366,16 @@ GainType Penalty_MTSP_MINMAX()
             Cost += C(N, NextN) - N->Pi - NextN->Pi;
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
-        if (Cost > P) {
+        if (Cost > MaxCost) {
             if (Cost > CurrentPenalty ||
                 (Cost == CurrentPenalty && CurrentGain <= 0)) {
                 return CurrentPenalty + (CurrentGain > 0);
             }
-            P = Cost;
+            MaxCost = Cost;
         }
-    } while (N != StartRoute);
+    } while (N != Depot);
     // printfff("_Old() all routes : %d\n", P);
-    return P;
+    return MaxCost;
 }
 
 GainType Penalty_MTSP_MINMAX_SIZE()
