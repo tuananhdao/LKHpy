@@ -11,6 +11,7 @@ static GainType oldPenaltyMax;
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 GainType Penalty_MTSP_MINMAX_Old(void);
 static GainType update_Penalty_MTSP_MINMAX(void);
+static GainType update_Penalty_MTSP_MINMAX_Old(void);
 static void setup_Node_MTSP_MINMAX(Node *);
 static void setup_Penalty_MTSP_MINMAX(void);
 static GainType calculate_DistanceSum(Node *initN, int Forward);
@@ -181,61 +182,9 @@ GainType Penalty_MTSP_MINMAX()
     else
     {
         printffff("Using the old penalty function.\n");
-        // Forward is true if the next node is not the first node of the next route
-        int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
-        Node *N = Depot, *NextN;
-        GainType Cost, P = MINUS_INFINITY;
-        RouteData *CurrId;
         if (!cava_PetalsData)
             cava_PetalsData = (RouteData *)calloc(Salesmen + 1, sizeof(RouteData));
-        do {
-            Cost = 0;
-            N->PetalId = cava_PetalsData; // depots point to 0 cell
-            CurrId = cava_PetalsData + N->DepotId;
-            CurrId->OldPenalty = 0;
-            do {
-                N->PetalId = CurrId;
-                NextN = Forward ? SUCC(N) : PREDD(N);
-                if (NextN->Id > DimensionSaved)
-                    NextN = Forward ? SUCC(NextN) : PREDD(NextN);
-                Cost += C(N, NextN) - N->Pi - NextN->Pi;
-            } while ((N = NextN)->DepotId == 0);
-            Cost /= Precision;
-            CurrId->OldPenalty = Cost;
-            if (Cost > P) {
-                if (Cost > CurrentPenalty ||
-                    (Cost == CurrentPenalty && CurrentGain <= 0)) {
-                    P = CurrentPenalty + (CurrentGain > 0);
-                    break;
-                }
-                P = Cost;
-            }
-        } while (N != Depot);
-        
-        if (P >= CurrentPenalty && 
-            !(P == CurrentPenalty && CurrentGain > 0)) {
-            // Not improve! free cava_PetalsData 
-            free(cava_PetalsData); 
-            cava_PetalsData = NULL;
-
-            /*
-            free N->PetalId 
-            comment out this while loop doesn't make it faster
-            */
-
-            // N = Depot;
-            // do
-            // {
-            //     N->PetalId = NULL;
-            //     do {
-            //         N->PetalId = NULL;
-            //         NextN = Forward ? SUCC(N) : PREDD(N);
-            //         if (NextN->Id > DimensionSaved)
-            //             NextN = Forward ? SUCC(NextN) : PREDD(NextN);
-            //     } while ((N = NextN)->DepotId == 0);
-            // } while (N != Depot);
-        }
-        return P;
+        return update_Penalty_MTSP_MINMAX_Old();
     }
 }
 
@@ -355,6 +304,42 @@ static GainType update_Penalty_MTSP_MINMAX()
         CurrId->OldPenalty = Cost;
         MaxCost = MAX(MaxCost, Cost);
         // printfff("-- New: route %d : %d\n", i++, Cost);
+    } while (N != Depot);
+    return MaxCost;
+}
+
+static GainType update_Penalty_MTSP_MINMAX_Old()
+{
+    // Forward is true if the next node is not the first node of the next route
+    int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
+    Node *N = Depot, *NextN;
+    GainType Cost, MaxCost = MINUS_INFINITY;
+    RouteData *CurrId;
+    do {
+        Cost = 0;
+        N->PetalId = cava_PetalsData; // depots point to 0 cell
+        CurrId = cava_PetalsData + N->DepotId;
+        CurrId->OldPenalty = 0;
+        do {
+            N->PetalId = CurrId;
+            NextN = Forward ? SUCC(N) : PREDD(N);
+            if (NextN->Id > DimensionSaved)
+                NextN = Forward ? SUCC(NextN) : PREDD(NextN);
+            Cost += C(N, NextN) - N->Pi - NextN->Pi;
+        } while ((N = NextN)->DepotId == 0);
+        Cost /= Precision;
+        CurrId->OldPenalty = Cost;
+        if (Cost > MaxCost) {
+            if (Cost > CurrentPenalty ||
+                (Cost == CurrentPenalty && CurrentGain <= 0)) {
+                MaxCost = CurrentPenalty + (CurrentGain > 0);
+                // break; // maybe wrong?
+            }
+            else
+            {
+                MaxCost = Cost;
+            }
+        }
     } while (N != Depot);
     return MaxCost;
 }
