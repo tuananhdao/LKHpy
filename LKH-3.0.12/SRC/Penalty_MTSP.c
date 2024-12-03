@@ -198,8 +198,6 @@ GainType Penalty_MTSP_MINMAX()
                 NextN = Forward ? SUCC(N) : PREDD(N);
                 if (NextN->Id > DimensionSaved)
                     NextN = Forward ? SUCC(NextN) : PREDD(NextN);
-                // Cost is the sum of the distances between the nodes in the route
-                // minus the Pi values of the nodes
                 Cost += C(N, NextN) - N->Pi - NextN->Pi;
             } while ((N = NextN)->DepotId == 0);
             Cost /= Precision;
@@ -216,8 +214,11 @@ GainType Penalty_MTSP_MINMAX()
         
         if (P >= CurrentPenalty && 
             !(P == CurrentPenalty && CurrentGain > 0)) {
+            // Not improve! free cava_PetalsData 
             free(cava_PetalsData); 
-            cava_PetalsData = 0;
+            cava_PetalsData = NULL;
+
+            // free N->PetalId
             N = Depot;
             do
             {
