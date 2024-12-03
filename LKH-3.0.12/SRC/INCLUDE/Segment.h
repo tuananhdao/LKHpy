@@ -48,12 +48,16 @@
 #ifdef TWO_LEVEL_TREE
 #define PRED(a) (Reversed == (a)->Parent->Reversed ? (a)->Pred : (a)->Suc)
 #define SUC(a) (Reversed == (a)->Parent->Reversed ? (a)->Suc : (a)->Pred)
+#define PRED_COST(a) (Reversed == (a)->Parent->Reversed ? (a)->PredCost : (a)->SucCost)
+#define SUC_COST(a) (Reversed == (a)->Parent->Reversed ? (a)->SucCost : (a)->PredCost)
 #define BETWEEN(a, b, c) Between_SL(a, b, c)
 #define FLIP(a, b, c, d) Flip_SL(a, b, c)
 #endif
 #ifdef ONE_LEVEL_TREE
 #define PRED(a) (Reversed ? (a)->Suc : (a)->Pred)
 #define SUC(a) (Reversed ? (a)->Pred : (a)->Suc)
+#define PRED_COST(a) (Reversed ? (a)->SucCost : (a)->PredCost)
+#define SUC_COST(a) (Reversed ? (a)->PredCost : (a)->SucCost)
 #define BETWEEN(a, b, c) Between(a, b, c)
 #define FLIP(a, b, c, d) Flip(a, b, c)
 #endif
@@ -62,6 +66,9 @@
                  Reversed ? (a)->Suc : (a)->Pred)
 #define SUCC(a) ((a)->Parent ? SUC(a) :\
                  Reversed ? (a)->Pred : (a)->Suc)
+
+#define SUCC_COST(a, b) ((a)->Parent ? SUC_COST(a) : Reversed ? (a)->PredCost : (a)->SucCost)
+#define PREDD_COST(a, b) ((a)->Parent ? PRED_COST(a) : Reversed ? (a)->SucCost : (a)->PredCost)
 
 #define Swap1(a1,a2,a3)\
         FLIP(a1,a2,a3,0)
