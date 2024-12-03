@@ -365,14 +365,11 @@ GainType Penalty_MTSP_MINMAX()
     // Forward is true if the next node is not the first node of the next route
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
     static Node *StartRoute = 0;
-    Node *N, *NextN, *CurrentRoute;
-    GainType Cost, P = MINUS_INFINITY;
+    Node *N = Depot, *NextN;
+    GainType Cost, MaxCost = MINUS_INFINITY;
 
-    StartRoute = Depot;
-    N = StartRoute;
     do {
         Cost = 0;
-        CurrentRoute = N;
         do {
             NextN = Forward ? SUCC(N) : PREDD(N);
             if (NextN->Id > DimensionSaved)
@@ -382,16 +379,16 @@ GainType Penalty_MTSP_MINMAX()
             Cost += C(N, NextN) - N->Pi - NextN->Pi;
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
-        if (Cost > P) {
+        if (Cost > MaxCost) {
             if (Cost > CurrentPenalty ||
                 (Cost == CurrentPenalty && CurrentGain <= 0)) {
                 return CurrentPenalty + (CurrentGain > 0);
             }
-            P = Cost;
+            MaxCost = Cost;
         }
-    } while (N != StartRoute);
+    } while (N != Depot);
     // printfff("_Old() all routes : %d\n", P);
-    return P;
+    return MaxCost;
 }
 
 GainType Penalty_MTSP_MINMAX_SIZE()
