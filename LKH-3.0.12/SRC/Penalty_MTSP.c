@@ -201,7 +201,7 @@ static GainType calculate_DistanceSum(Node *initN, int Forward)
     //Forward
     while (N->DepotId == 0)
     {
-        NextN = Forward ? SUC(N) : PREDD(N);
+        NextN = Forward ? SUCC(N) : PREDD(N);
         DistanceSum += C(N, NextN) - N->Pi - NextN->Pi;
         N = NextN;
         N->PFlag = 0;
@@ -224,7 +224,7 @@ static void setup_Penalty_MTSP_MINMAX()
             // If a move has involved the edge of an empty route an additional empty one needs to be counted
             Node *t1 = s->t1, *t2 = s->t2, *t3 = s->t3, *t4 = s->t4;
             // the edges (t1, t2) and (t3, t4) are removed,
-            // and the new edges (t1, t3) and (t2, t4) are added to form a new tour.
+            // and the new edges (t1, t4) and (t2, t3) are added to form a new tour.
 
             setup_Node_MTSP_MINMAX(t1);
             setup_Node_MTSP_MINMAX(t2);
