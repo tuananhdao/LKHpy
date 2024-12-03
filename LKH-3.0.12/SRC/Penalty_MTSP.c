@@ -218,18 +218,22 @@ GainType Penalty_MTSP_MINMAX()
             free(cava_PetalsData); 
             cava_PetalsData = NULL;
 
-            // free N->PetalId
-            N = Depot;
-            do
-            {
-                N->PetalId = NULL;
-                do {
-                    N->PetalId = NULL;
-                    NextN = Forward ? SUCC(N) : PREDD(N);
-                    if (NextN->Id > DimensionSaved)
-                        NextN = Forward ? SUCC(NextN) : PREDD(NextN);
-                } while ((N = NextN)->DepotId == 0);
-            } while (N != Depot);
+            /*
+            free N->PetalId 
+            comment out this while loop doesn't make it faster
+            */
+
+            // N = Depot;
+            // do
+            // {
+            //     N->PetalId = NULL;
+            //     do {
+            //         N->PetalId = NULL;
+            //         NextN = Forward ? SUCC(N) : PREDD(N);
+            //         if (NextN->Id > DimensionSaved)
+            //             NextN = Forward ? SUCC(NextN) : PREDD(NextN);
+            //     } while ((N = NextN)->DepotId == 0);
+            // } while (N != Depot);
         }
         return P;
     }
