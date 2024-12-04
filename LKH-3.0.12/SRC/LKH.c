@@ -29,6 +29,7 @@ int CacheMask;  /* Mask for indexing the cache */
 int *CacheVal;  /* Table of cached distances */
 int *CacheSig;  /* Table of the signatures of cached 
                    distances */
+int *PenaltyCacheSig;  /* Table of cached penalty*/
 int CandidateFiles;     /* Number of CANDIDATE_FILEs */
 int EdgeFiles;          /* Number of EDGE_FILEs */
 int *CostMatrix;        /* Cost matrix */
