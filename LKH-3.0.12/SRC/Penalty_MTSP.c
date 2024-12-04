@@ -202,7 +202,7 @@ static GainType calculate_DistanceSum(Node *initN, int Forward)
     while (N->DepotId == 0)
     {
         NextN = Forward ? SUCC(N) : PREDD(N);
-        DistanceSum += _Penalty(N, NextN);
+        DistanceSum += MTSP_Penalty(N, NextN);
         N = NextN;
         N->PFlag = 0;
     }
@@ -297,7 +297,7 @@ static GainType update_Penalty_MTSP_MINMAX()
         do {
             N->PetalId = CurrId;
             NextN = Forward ? SUCC(N) : PREDD(N);
-            Cost += _Penalty(N, NextN);
+            Cost += MTSP_Penalty(N, NextN);
             // printfff("%d -> %d: %d\n", N->Id, NextN->Id, (C(N, NextN) - N->Pi - NextN->Pi)/Precision);
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
@@ -325,7 +325,7 @@ static GainType update_Penalty_MTSP_MINMAX_Old()
             NextN = Forward ? SUCC(N) : PREDD(N);
             if (NextN->Id > DimensionSaved)
                 NextN = Forward ? SUCC(NextN) : PREDD(NextN);
-            Cost += _Penalty(N, NextN);
+            Cost += MTSP_Penalty(N, NextN);
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
         CurrId->OldPenalty = Cost;
@@ -363,7 +363,7 @@ GainType Penalty_MTSP_MINMAX()
                 NextN = Forward ? SUCC(NextN) : PREDD(NextN);
             // Cost is the sum of the distances between the nodes in the route
             // minus the Pi values of the nodes
-            Cost += _Penalty(N, NextN);
+            Cost += MTSP_Penalty(N, NextN);
         } while ((N = NextN)->DepotId == 0);
         Cost /= Precision;
         if (Cost > MaxCost) {

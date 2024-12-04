@@ -665,7 +665,7 @@ static inline int C(Node *Na, Node *Nb) {
     return _C(Na, Nb);
 }
 
-static inline int _Penalty(Node *Na, Node *Nb) {
+static inline int MTSP_Penalty(Node *Na, Node *Nb) {
     if (PenaltyCacheSig) {
         int Index, i, j;
         i = Na->Id;
@@ -707,6 +707,10 @@ static inline int Forbidden(Node *Na, Node *Nb) {
 
 extern CostFunction C;
 int Forbidden(Node *Na, Node *Nb);
+
+static inline int MTSP_Penalty(Node *Na, Node *Nb) {
+    return C(Na, Nb) - Na->Pi - Nb->Pi;
+}
 
 #endif
 
