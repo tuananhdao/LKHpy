@@ -60,6 +60,7 @@ void AllocateStructures()
     CacheMask = i - 1;
     if (WeightType != EXPLICIT) {
         CacheSig = (int *) calloc(i * 2, sizeof(int));
+        PenaltyCacheSig = (int *) calloc(i * 2, sizeof(int));
     }
     
 #endif

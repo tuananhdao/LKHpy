@@ -252,6 +252,8 @@ extern int CacheMask;  /* Mask for indexing the cache */
 extern int *CacheVal;  /* Table of cached distances */
 extern int *CacheSig;  /* Table of the signatures of cached 
                           distances */
+
+extern int *PenaltyCacheSig;  /* Table of cached penalty */ 
 extern int CandidateFiles;     /* Number of CANDIDATE_FILEs */
 extern int EdgeFiles;          /* Number of EDGE_FILEs */
 extern int *CostMatrix;        /* Cost matrix */
@@ -662,6 +664,28 @@ static inline int C(Node *Na, Node *Nb) {
     }
     return _C(Na, Nb);
 }
+
+static inline int _Penalty(Node *Na, Node *Nb) {
+    if (PenaltyCacheSig) {
+        int Index, i, j;
+        i = Na->Id;
+        j = Nb->Id;
+        if (i > j) {
+            int k = i;
+            i = j;
+            j = k;
+        }
+        Index = ((i << 8) + i + j) & CacheMask;
+        if (PenaltyCacheSig[Index * 2] == i) 
+            return PenaltyCacheSig[Index * 2 + 1];
+
+        PenaltyCacheSig[Index * 2] = i;
+        int baseCost = _C(Na, Nb);
+        return (PenaltyCacheSig[Index * 2 + 1] = baseCost - Na->Pi - Nb->Pi);
+    }
+    return _C(Na, Nb) - Na->Pi - Nb->Pi;
+}
+
 /* A similar cache is introduced also for the Forbidden function to reduce cache-misses */
 int _Forbidden(Node *Na, Node *Nb);
 static inline int Forbidden(Node *Na, Node *Nb) {

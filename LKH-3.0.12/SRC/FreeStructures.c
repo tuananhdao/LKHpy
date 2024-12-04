@@ -28,6 +28,7 @@ void FreeStructures()
     Free(HTable);
     Free(Rand);
     Free(CacheSig);
+    Free(PenaltyCacheSig);
     Free(CacheVal);
     Free(Name);
     Free(Type);
