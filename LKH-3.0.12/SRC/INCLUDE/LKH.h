@@ -675,7 +675,7 @@ static inline int MTSP_Penalty(Node *Na, Node *Nb) {
             i = j;
             j = k;
         }
-        Index = ((i << 8) + i + j) & CacheMask;
+        Index = ((i << 10) + i + j) & CacheMask;
         if (PenaltyCacheSig[Index * 2] == i) 
             return PenaltyCacheSig[Index * 2 + 1];
 
