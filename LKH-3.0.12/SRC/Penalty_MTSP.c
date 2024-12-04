@@ -202,7 +202,7 @@ static GainType calculate_DistanceSum(Node *initN, int Forward)
     while (N->DepotId == 0)
     {
         NextN = Forward ? SUCC(N) : PREDD(N);
-        DistanceSum += C(N, NextN) - N->Pi - NextN->Pi;
+        DistanceSum += _Penalty(N, NextN);
         N = NextN;
         N->PFlag = 0;
     }
