@@ -1,4 +1,23 @@
 #include "solver_int.h"
+#include "time.h"
+#include <stdio.h>
+
+// Define ANSI color codes
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN    "\033[36m"
+
+void measure_execution_time(void (*func)(), const char *func_name) {
+    clock_t start = clock();  
+    func();
+    clock_t end = clock();    
+    double cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf(GREEN "DEBUG: " RESET "Time execute " BLUE "%s" RESET ": " RED "%.6f seconds\n" RESET, func_name, cpu_time_used);
+}
 
 // Function to accept a 2D NumPy array
 py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict params) {
@@ -12,9 +31,16 @@ py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict p
     Node *N;
     int i;
 
+    clock_t start, end;
+    double cpu_time_used;
+
     ParameterFileName = "Dummy";
     // ReadParameters();
+    start = clock();
     ReadParametersFromDictionary(params);
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf(GREEN "DEBUG: " RESET "Time execute " BLUE "ReadParametersFromDictionary" RESET ": " RED "%.6f seconds\n" RESET, cpu_time_used);
     
     StartTime = LastTime = GetTime();
     MaxMatrixDimension = 20000;
@@ -25,7 +51,11 @@ py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict p
 
     // ReadProblem();
     if (std::string(arrayType) == "cost_matrix") {
+        start = clock();
         ReadMatrix(array);
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf(GREEN "DEBUG: " RESET "Time execute " BLUE "ReadMatrix" RESET ": " RED "%.6f seconds\n" RESET, cpu_time_used);
     }
     else if (std::string(arrayType) == "euclid") {
         ReadXY_int(arrayType, array);
@@ -51,16 +81,17 @@ py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict p
             SolveTourSegmentSubproblems();
         return GetOutputTour(BestTour);
     }
-    AllocateStructures();
+    measure_execution_time(AllocateStructures, "AllocateStructures");
     if (ProblemType == TSPTW)
         TSPTW_Reduce();
     if (ProblemType == VRPB || ProblemType == VRPBTW)
         VRPB_Reduce();
     if (ProblemType == PDPTW)
         PDPTW_Reduce();
-    CreateCandidateSet();
-    InitializeStatistics();
-
+    
+    measure_execution_time(CreateCandidateSet, "CreateCandidateSet");
+    measure_execution_time(InitializeStatistics, "InitializeStatistics");
+    
     if (Norm != 0 || Penalty) {
         Norm = 9999;
         BestCost = PLUS_INFINITY;
@@ -92,7 +123,13 @@ py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict p
             Run--;
             break;
         }
+
+        start = clock();
         Cost = FindTour();      /* using the Lin-Kernighan heuristic */
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf(GREEN "DEBUG: " RESET "Time execute " BLUE "FindTour" RESET ": " RED "%.6f seconds\n" RESET, cpu_time_used);
+
         if (MaxPopulationSize > 1 && !TSPTW_Makespan) {
             /* Genetic algorithm */
             int i;
@@ -149,8 +186,8 @@ py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict p
             (CurrentPenalty == BestPenalty && Cost < BestCost)) {
             BestPenalty = CurrentPenalty;
             BestCost = Cost;
-            RecordBetterTour();
-            RecordBestTour();
+            measure_execution_time(RecordBetterTour, "RecordBetterTour");
+            measure_execution_time(RecordBestTour, "RecordBestTour");
             // WriteTour(TourFileName, BestTour, BestCost);
         }
         OldOptimum = Optimum;
@@ -279,5 +316,10 @@ py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict p
         SOP_Report(BestCost);
     }
     printff("\n");
-    return GetOutputTour(BestTour);
+    start = clock();
+    py::array_t<int> outputTour = GetOutputTour(BestTour);
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf(GREEN "DEBUG: " RESET "Time execute " BLUE "GetOutputTour" RESET ": " RED "%.6f seconds\n" RESET, cpu_time_used);
+    return outputTour;
 }
