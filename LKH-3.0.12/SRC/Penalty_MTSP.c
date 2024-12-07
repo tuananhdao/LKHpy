@@ -97,13 +97,6 @@ GainType Penalty_MTSP_MINMAX()
         //printfff("\nSwaps LOOP!! Swaps: %d\n", Swaps);
         NC_idx = setup_Penalty_MTSP_MINMAX();
 
-        printff("\n\nNodeCache: ");
-        for (int i = 0; i < NC_idx; i++)
-        {
-            printff("%d ", cava_NodeCache[i]->Id);
-        }
-        printff("\n");
-
         // printff("Routes start at:");
         // for (int i = 0; i < NC_idx; i++)
         // {
@@ -139,6 +132,12 @@ GainType Penalty_MTSP_MINMAX()
             int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
             Node *NextN;
             printff("\n\n====\nNC_idx: %d\n", NC_idx);
+            printff("\n\nNodeCache: ");
+            for (int i = 0; i < NC_idx; i++)
+            {
+                printff("%d ", cava_NodeCache[i]->Id);
+            }
+            printff("\n");
             while (NC_idx)
             {
                 RouteData *petal = cava_NodeCache[--NC_idx]->PetalId;
@@ -184,13 +183,14 @@ GainType Penalty_MTSP_MINMAX()
                         printff("mid point %d\n", N->Id);
                         DistanceSum = calculate_DistanceSum(N, 1) + calculate_DistanceSum(N, 0);
 
-                        printff("\nDistanceSum old %lld\n====\n", DistanceSum);
+                        printff("\nDistanceSum old %lld\n", DistanceSum);
 
                         // if (DistanceSum > CurrentPenalty)
                         //     return CurrentPenalty + (CurrentGain > 0);
                     }
                 }
             }
+            printff("====\n");
             if (TTTTT++ > 2)
                 exit(0);
             return CurrentPenalty;
@@ -281,8 +281,8 @@ static int setup_Penalty_MTSP_MINMAX()
     // Reset petals flags and minNode for the routes involved in the swaps
     for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
     {
-        s->t1->PetalId->flag = s->t4->PetalId->flag = 0;
-        s->t1->PetalId->minNode = s->t4->PetalId->minNode = NULL;
+        s->t1->PetalId->flag = s->t2->PetalId->flag = s->t3->PetalId->flag = s->t4->PetalId->flag = 0;
+        s->t1->PetalId->minNode = s->t2->PetalId->minNode = s->t3->PetalId->minNode = s->t4->PetalId->minNode = NULL;
     }
     // printff("\nSwaps: %d\n", Swaps);
     for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
@@ -297,14 +297,32 @@ static int setup_Penalty_MTSP_MINMAX()
         // setup_Node_MTSP_MINMAX(t3);
         // setup_Node_MTSP_MINMAX(t4);
 
-        if ((N = setup_Node_MTSP_MINMAX(s->t1)) != NULL)
-            cava_NodeCache[touched_routes++] = N;
-        if ((N = setup_Node_MTSP_MINMAX(s->t4)) != NULL)
-            cava_NodeCache[touched_routes++] = N;
-        if ((N = setup_Node_MTSP_MINMAX(s->t2)) != NULL)
-            cava_NodeCache[touched_routes++] = N;
-        if ((N = setup_Node_MTSP_MINMAX(s->t3)) != NULL)
-            cava_NodeCache[touched_routes++] = N;
+        // if ((N = setup_Node_MTSP_MINMAX(s->t1)) != NULL)
+        //     cava_NodeCache[touched_routes++] = N;
+        // if ((N = setup_Node_MTSP_MINMAX(s->t4)) != NULL)
+        //     cava_NodeCache[touched_routes++] = N;
+        // if ((N = setup_Node_MTSP_MINMAX(s->t2)) != NULL)
+        //     cava_NodeCache[touched_routes++] = N;
+        // if ((N = setup_Node_MTSP_MINMAX(s->t3)) != NULL)
+        //     cava_NodeCache[touched_routes++] = N;
+
+        Node* NN;
+        for (int twice = 0; twice < 2; ++twice)
+        {
+            if (twice > 0)
+                N = !s->t2->DepotId ? s->t2 : s->t3;
+            else
+                N = !s->t1->DepotId ? s->t1 : s->t4;
+            if (!N->DepotId)
+            {
+                printff("setting up node %d\n", N->Id);
+                if ((NN = setup_Node_MTSP_MINMAX(N)) != NULL)
+                {
+                    printff("NN: %d\n", NN->Id);
+                    cava_NodeCache[touched_routes++] = NN;
+                }
+            }
+        }
 
         route_min_node_update(t1);
         route_min_node_update(t2);
@@ -361,7 +379,7 @@ void route_min_node_update(Node *t)
         printff("No minNode. Set to %d. Petal rank %d.", t->Id, t->PetalRank);
     } else if (t->PetalId->minNode->PetalRank > t->PetalRank)
     {
-        printff("PetalRank %d > %d. Set to %d", t->PetalId->minNode->PetalRank, t->PetalRank, t->Id);
+        printff("PetalRank %d < %d. Set to %d", t->PetalRank, t->PetalId->minNode->PetalRank, t->Id);
     }
 
     if (!t->PetalId->minNode || t->PetalId->minNode->PetalRank > t->PetalRank)
@@ -401,6 +419,7 @@ static GainType update_Penalty_MTSP_MINMAX()
     GainType MaxCost = 0;
     int i = 1;
     // printfff("Update Penalty_MTSP_MINMAX (expensive func)\n");
+    printff("\n");
     do
     {
         Cost = 0;
@@ -409,15 +428,17 @@ static GainType update_Penalty_MTSP_MINMAX()
         CurrId->OldPenalty = 0;
         int PetalRank = 0;
         
+        printff("PetalRank Route %d: ", N->DepotId);
         do {
             N->PetalId = CurrId;
             N->PetalRank = PetalRank++;
-            NextN->PetalRank = PetalRank++;
+            printff("#%d: %d -> ", N->PetalRank, N->Id);
             N->prevCostSum = Cost;
             NextN = Forward ? SUCC(N) : PREDD(N);
             Cost += MTSP_Penalty(N, NextN);
             // printfff("%d -> %d: %d\n", N->Id, NextN->Id, (C(N, NextN) - N->Pi - NextN->Pi)/Precision);
         } while ((N = NextN)->DepotId == 0);
+        printff("\n");
         Cost /= Precision;
         CurrId->OldPenalty = Cost;
         MaxCost = MAX(MaxCost, Cost);
@@ -433,17 +454,17 @@ static GainType Penalty_MTSP_MINMAX_Old()
     Node *N = Depot, *NextN;
     GainType Cost, MaxCost = MINUS_INFINITY;
     RouteData *CurrId;
+    printff("\n");
     do {
         Cost = 0;
         N->PetalId = cava_PetalsData; // depots point to 0 cell
         CurrId = cava_PetalsData + N->DepotId;
         CurrId->OldPenalty = 0;
         int PetalRank = 0;
-        // printff("Route %d: ", N->DepotId);
+        printff("PetalRank Route %d: ", N->DepotId);
         do {
             N->PetalRank = PetalRank++;
-            NextN->PetalRank = PetalRank++;
-            // printff("#%d: %d -> ", N->PetalRank, N->Id);
+            printff("#%d: %d -> ", N->PetalRank, N->Id);
             N->prevCostSum = Cost;
             N->PetalId = CurrId;
             NextN = Forward ? SUCC(N) : PREDD(N);
@@ -451,7 +472,7 @@ static GainType Penalty_MTSP_MINMAX_Old()
                 NextN = Forward ? SUCC(NextN) : PREDD(NextN);
             Cost += MTSP_Penalty(N, NextN);
         } while ((N = NextN)->DepotId == 0);
-        // printff("\n");
+        printff("\n");
         Cost /= Precision;
         CurrId->OldPenalty = Cost;
         if (Cost > MaxCost) {
