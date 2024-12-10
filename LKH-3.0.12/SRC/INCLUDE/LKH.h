@@ -729,9 +729,11 @@ typedef struct _RouteData
                     swap-stack (in the latter case it does not 
                     need to be counted).  In CVRPTW it contains 
                     the "warmstart node" from which we can start.*/
+    Node *maxNode;
 } RouteData;
 extern RouteData *cava_PetalsData;
 extern Node **cava_NodeCache;
+extern MinNodeHashTable *MinNodeHTable;
 #endif
 
 #endif

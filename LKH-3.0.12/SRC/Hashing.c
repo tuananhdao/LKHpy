@@ -1,4 +1,6 @@
 #include "Hashing.h"
+#include <stddef.h>
+#include <stdlib.h>
 
 /*
  * The functions HashInitialize, HashInsert and HashSearch is used
@@ -72,4 +74,43 @@ int HashSearch(HashTable * T, unsigned Hash, GainType Cost)
         if ((i -= p) < 0)
             i += HashTableSize;
     return T->Entry[i].Hash == Hash;
+}
+
+void MinNodeHashInitialize(MinNodeHashTable * T)
+{
+    for (int i = 0; i < HashTableSize; i++) {
+        T->Entry[i] = NULL; // Note: This will cause memory leak but it's quick
+    }
+    T->Count = 0;
+}
+
+void MinNodeHashInsert(MinNodeHashTable * T, int Id, int PrevId, GainType PrevCostSum)
+{
+    int i = Id % HashTableSize;
+    MinNodeHashTableEntry *newEntry = malloc(sizeof(MinNodeHashTableEntry));
+    newEntry->Id = Id;
+    newEntry->PrevId = PrevId;
+    newEntry->PrevCostSum = PrevCostSum;
+    newEntry->next = T->Entry[i]; // Insert at the head of the chain
+    T->Entry[i] = newEntry;       // Update the bucket pointer
+    T->Count++;
+}
+
+GainType MinNodeHashSearch(MinNodeHashTable *T, int Id, int PrevId) {
+    int i = Id % HashTableSize; // Compute the hash index
+    MinNodeHashTableEntry *entry = T->Entry[i];
+
+    // Traverse the chain for this bucket
+    // while (entry != NULL) {
+    //     if (entry->Id == Id && entry->PrevId == PrevId) {
+    //         return entry->PrevCostSum; // Return if matching entry is found
+    //     }
+    //     entry = entry->next; // Move to the next entry in the chain
+    // }
+    if (entry != NULL && entry->Id == Id && entry->PrevId == PrevId) {
+        return entry->PrevCostSum; // Return if matching entry is found
+    }
+
+    // If no matching entry is found
+    return MINUS_INFINITY;
 }

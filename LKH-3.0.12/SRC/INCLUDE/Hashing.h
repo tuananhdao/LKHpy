@@ -26,4 +26,22 @@ void HashInsert(HashTable * T, unsigned Hash, GainType Cost);
 
 int HashSearch(HashTable * T, unsigned Hash, GainType Cost);
 
+typedef struct MinNodeHashTableEntry {
+    int Id;
+    int PrevId;
+    GainType PrevCostSum;
+    struct MinNodeHashTableEntry *next; // Pointer to handle collisions
+} MinNodeHashTableEntry;
+
+typedef struct MinNodeHashTable {
+    MinNodeHashTableEntry *Entry[HashTableSize];
+    int Count; /* Number of occupied entries */
+} MinNodeHashTable;
+
+void MinNodeHashInitialize(MinNodeHashTable * T);
+
+void MinNodeHashInsert(MinNodeHashTable * T, int Id, int PrevId, GainType PrevCostSum);
+
+GainType MinNodeHashSearch(MinNodeHashTable *T, int Id, int PrevId);
+
 #endif
