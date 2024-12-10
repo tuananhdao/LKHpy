@@ -311,6 +311,13 @@ static void setup_Penalty_MTSP_MINMAX()
         if (N->DepotId != 0 || PrevN == NULL || PrevN->DepotId != 0)
             continue;
         MinNodeHashInsert(MinNodeHTable, N->Id, PrevRank, N->prevCostSum);
+
+        // N = Petal->maxNode; // not null
+        // PrevN = Forward ? PREDD(N) : SUCC(N);
+        // int PrevRank = Forward ? N->PetalRank + 1 : N->PetalRank - 1;
+        // if (N->DepotId != 0 || PrevN == NULL || PrevN->DepotId != 0)
+        //     continue;
+        // MinNodeHashInsert(MinNodeHTable, N->Id, PrevRank, N->PetalId->OldPenalty - N->prevCostSum);
     }
     for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
     {
