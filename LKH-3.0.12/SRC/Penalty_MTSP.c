@@ -1,7 +1,7 @@
 #include "LKH.h"
 #include "Segment.h"
 
-#define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
+// #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
 #define printffff if (0) printff // when investigating speedup, set to if (1)
 
 #ifdef CAVA_PENALTY
@@ -320,12 +320,12 @@ static void setup_Penalty_MTSP_MINMAX()
             continue;
         MinNodeHashInsert(MinNodeHTable, N->Id, PrevRank, N->prevCostSum);
 
-        // N = Petal->maxNode; // not null
-        // PrevN = Forward ? PREDD(N) : SUCC(N);
-        // PrevRank = Forward ? N->PetalRank + 1 : N->PetalRank - 1;
-        // if (N->DepotId != 0 || PrevN == NULL || PrevN->DepotId != 0)
-        //     continue;
-        // MinNodeHashInsert(MinNodeHTable, N->Id, PrevRank, N->PetalId->OldPenalty - N->prevCostSum);
+        N = Petal->maxNode; // not null
+        PrevN = Forward ? PREDD(N) : SUCC(N);
+        PrevRank = Forward ? N->PetalRank + 1 : N->PetalRank - 1;
+        if (N->DepotId != 0 || PrevN == NULL || PrevN->DepotId != 0)
+            continue;
+        MinNodeHashInsert(MinNodeHTable, N->Id, PrevRank, N->PetalId->OldPenalty * Precision - N->prevCostSum);
     }
     for (SwapRecord *s = SwapStack + Swaps - 1; s >= SwapStack; --s)
     {
