@@ -35,7 +35,7 @@ typedef struct MinNodeHashTableEntry {
 
 typedef struct MinNodeHashTable {
     MinNodeHashTableEntry *Entry[MinNodeHashTableSize];
-    int Count; /* Number of occupied entries */
+    int size;
 } MinNodeHashTable;
 
 void MinNodeHashInitialize(MinNodeHashTable * T);
