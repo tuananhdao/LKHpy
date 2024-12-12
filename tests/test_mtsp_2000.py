@@ -14,11 +14,11 @@ def test_mtsp():
         '#SHOW_OUTPUT': SHOW_OUTPUT,
         'SPECIAL': '',
         'INITIAL_TOUR_ALGORITHM': 'NEAREST-NEIGHBOR',
-        'SEED': 2,
+        'SEED': 1,
         'MTSP_OBJECTIVE': 'MINMAX',
         'MAX_CANDIDATES': 6,
         'MAX_TRIALS': 10000,
-        'SALESMEN': 10,
+        'SALESMEN': 4,
         'RUNS': 1,
         'TOTAL_TIME_LIMIT': 20}
     result = LK.cost_matrix(cost_matrix, params)

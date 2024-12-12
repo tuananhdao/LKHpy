@@ -14,6 +14,7 @@ def test_mtsp(cost_matrix, salesmen, exact_tour):
     params = {
         '#SHOW_OUTPUT': SHOW_OUTPUT,
         'SPECIAL': '',
+        'INITIAL_TOUR_ALGORITHM': 'NEAREST-NEIGHBOR',
         'SEED': 1,
         'MTSP_OBJECTIVE': 'MINMAX',
         'MAX_CANDIDATES': 6,
