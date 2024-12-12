@@ -1,4 +1,7 @@
 #include "Hashing.h"
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*
  * The functions HashInitialize, HashInsert and HashSearch is used
@@ -72,4 +75,32 @@ int HashSearch(HashTable * T, unsigned Hash, GainType Cost)
         if ((i -= p) < 0)
             i += HashTableSize;
     return T->Entry[i].Hash == Hash;
+}
+
+void MinNodeHashInitialize(MinNodeHashTable * T)
+{
+    // for (int i = 0; i < MinNodeHashTableSize; i++) {
+    //     T->Entry[i] = NULL; // Note: This will cause memory leak but it's quick
+    // }
+    memset(T->Entry, 0, T->size * sizeof(MinNodeHashTableEntry *));
+}
+
+void MinNodeHashInsert(MinNodeHashTable * T, int Id, int PrevId, GainType PrevCostSum)
+{
+    MinNodeHashTableEntry *newEntry = malloc(sizeof(MinNodeHashTableEntry));
+    newEntry->Id = Id;
+    newEntry->PrevId = PrevId;
+    newEntry->PrevCostSum = PrevCostSum;
+    T->Entry[Id] = newEntry;       // Update the bucket pointer
+}
+
+GainType MinNodeHashSearch(MinNodeHashTable *T, int Id, int PrevId) {
+    MinNodeHashTableEntry *entry = T->Entry[Id];
+
+    if (entry != NULL && entry->Id == Id && entry->PrevId == PrevId) {
+        return entry->PrevCostSum; // Return if matching entry is found
+    }
+
+    // If no matching entry is found
+    return MINUS_INFINITY;
 }

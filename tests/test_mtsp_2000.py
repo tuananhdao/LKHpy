@@ -13,6 +13,7 @@ def test_mtsp():
     params = {
         '#SHOW_OUTPUT': SHOW_OUTPUT,
         'SPECIAL': '',
+        'INITIAL_TOUR_ALGORITHM': 'NEAREST-NEIGHBOR',
         'SEED': 1,
         'MTSP_OBJECTIVE': 'MINMAX',
         'MAX_CANDIDATES': 6,

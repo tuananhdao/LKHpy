@@ -207,6 +207,7 @@ int* cava_ForbiddenCacheSig;
 #ifdef CAVA_PENALTY
 RouteData *cava_PetalsData;
 Node **cava_NodeCache;
+MinNodeHashTable *MinNodeHTable;
 #endif
 
 MergeTourFunction MergeWithTour;
