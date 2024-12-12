@@ -1,7 +1,7 @@
 #include "LKH.h"
 #include "Segment.h"
 
-// #define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
+#define REDUNDANT_CHECK /* ONLY DEBUG: checks old and new and assert they are the same. */
 #define printffff if (0) printff // when investigating speedup, set to if (1)
 
 #ifdef CAVA_PENALTY
@@ -16,6 +16,7 @@ static void setup_Node_MTSP_MINMAX(Node *);
 static void setup_Penalty_MTSP_MINMAX(void);
 static GainType calculate_DistanceSum(Node *initN, int Forward);
 void route_min_node_update(Node *t);
+static GainType get_max_cost();
 
 int SwapCaseCount = 0;
 #define printfff if (SwapCaseCount == -1) printff
@@ -179,11 +180,15 @@ GainType Penalty_MTSP_MINMAX()
             return P;
         }
 
-        printffff("Improved!\n");
-        printffff("-- P: %d\n", P);
-        printffff("-- oldPenaltyMax: %d\n", oldPenaltyMax);
-        printffff("-- CurrentPenalty: %d\n", CurrentPenalty);
-        return update_Penalty_MTSP_MINMAX(); //Improved!
+        P = get_max_cost();
+        if (P == CurrentPenalty && CurrentGain < 0)
+        {
+            return CurrentPenalty;
+        }
+        else
+        {
+            return update_Penalty_MTSP_MINMAX();
+        }
     }
     else
     {
@@ -229,7 +234,10 @@ static GainType calculate_DistanceSum(Node *initN, int Forward)
     printfff("%d.", N->Id);
     printfff("\n");
     if (NewDistanceSum != DistanceSum)
+    {
         printff("Round %d: NewDistanceSum: %lld DistanceSum: %lld\n", SwapCaseCount, NewDistanceSum, DistanceSum);
+    }
+        
     // assert(NewDistanceSum == DistanceSum);
     DistanceSum /= Precision;
     return DistanceSum;
@@ -288,16 +296,16 @@ static void setup_Penalty_MTSP_MINMAX()
         route_min_node_update(s->t3);
         route_min_node_update(s->t4);
 
-        if (s->t1->PetalRank == 0 || s->t2->PetalRank == 0 || s->t3->PetalRank == 0 || s->t4->PetalRank == 0)
-        {
-            // temporary fix
-            // TODO: save the first node after the depot and calculate distances from it
-            // calculate_DistanceSum: after going back to that node, continue exploring.
-            s->t1->PetalId->minNode = Depot;
-            s->t2->PetalId->minNode = Depot;
-            s->t3->PetalId->minNode = Depot;
-            s->t4->PetalId->minNode = Depot;
-        }
+        // if (s->t1->PetalRank == 0 || s->t2->PetalRank == 0 || s->t3->PetalRank == 0 || s->t4->PetalRank == 0)
+        // {
+        //     // temporary fix
+        //     // TODO: save the first node after the depot and calculate distances from it
+        //     // calculate_DistanceSum: after going back to that node, continue exploring.
+        //     s->t1->PetalId->minNode = Depot;
+        //     s->t2->PetalId->minNode = Depot;
+        //     s->t3->PetalId->minNode = Depot;
+        //     s->t4->PetalId->minNode = Depot;
+        // }
     }
     MinNodeHashInitialize(MinNodeHTable);
     for (int i = 1; i < Salesmen + 1; i++)
@@ -314,7 +322,7 @@ static void setup_Penalty_MTSP_MINMAX()
 
         // N = Petal->maxNode; // not null
         // PrevN = Forward ? PREDD(N) : SUCC(N);
-        // int PrevRank = Forward ? N->PetalRank + 1 : N->PetalRank - 1;
+        // PrevRank = Forward ? N->PetalRank + 1 : N->PetalRank - 1;
         // if (N->DepotId != 0 || PrevN == NULL || PrevN->DepotId != 0)
         //     continue;
         // MinNodeHashInsert(MinNodeHTable, N->Id, PrevRank, N->PetalId->OldPenalty - N->prevCostSum);
@@ -405,6 +413,36 @@ static GainType update_Penalty_MTSP_MINMAX()
         cava_PetalsData[i].minNode = NULL;
         cava_PetalsData[i].maxNode = NULL;
     }
+
+    return MaxCost;
+}
+
+static GainType get_max_cost()
+{
+    // updates the penalty metadata for each route in the solution
+    // It iterates through all routes starting from the depot
+    // and updates the OldPenalty in the RouteData structure for each route.
+    // not the entire solution / max(all routes)
+    int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
+    Node *N = Depot, *NextN;
+    RouteData *CurrId;
+    GainType Cost;
+    GainType MaxCost = 0;
+    int i = 1;
+    // printff("Round %d update_Penalty_MTSP_MINMAX\n", SwapCaseCount);
+    // printfff("Update Penalty_MTSP_MINMAX (expensive func)\n");
+    do
+    {
+        Cost = 0;
+        do {
+            NextN = Forward ? SUCC(N) : PREDD(N);
+            if (NextN->Id > DimensionSaved)
+                NextN = Forward ? SUCC(NextN) : PREDD(NextN);
+            Cost += MTSP_Penalty(N, NextN);
+        } while ((N = NextN)->DepotId == 0);
+        Cost /= Precision;
+        MaxCost = MAX(MaxCost, Cost);
+    } while (N != Depot);
 
     return MaxCost;
 }
