@@ -8,6 +8,7 @@
 #include "GainType.h"
 
 #define HashTableSize 65521     /* Largest prime less than USHRT_MAX */
+#define MinNodeHashTableSize 5100
 #define MaxLoadFactor 0.75
 
 typedef struct HashTableEntry {
@@ -34,7 +35,7 @@ typedef struct MinNodeHashTableEntry {
 } MinNodeHashTableEntry;
 
 typedef struct MinNodeHashTable {
-    MinNodeHashTableEntry *Entry[HashTableSize];
+    MinNodeHashTableEntry *Entry[MinNodeHashTableSize];
     int Count; /* Number of occupied entries */
 } MinNodeHashTable;
 

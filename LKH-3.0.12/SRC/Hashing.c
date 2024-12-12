@@ -78,7 +78,7 @@ int HashSearch(HashTable * T, unsigned Hash, GainType Cost)
 
 void MinNodeHashInitialize(MinNodeHashTable * T)
 {
-    for (int i = 0; i < HashTableSize; i++) {
+    for (int i = 0; i < MinNodeHashTableSize; i++) {
         T->Entry[i] = NULL; // Note: This will cause memory leak but it's quick
     }
     T->Count = 0;
@@ -86,19 +86,18 @@ void MinNodeHashInitialize(MinNodeHashTable * T)
 
 void MinNodeHashInsert(MinNodeHashTable * T, int Id, int PrevId, GainType PrevCostSum)
 {
-    int i = Id % HashTableSize;
     MinNodeHashTableEntry *newEntry = malloc(sizeof(MinNodeHashTableEntry));
     newEntry->Id = Id;
     newEntry->PrevId = PrevId;
     newEntry->PrevCostSum = PrevCostSum;
-    newEntry->next = T->Entry[i]; // Insert at the head of the chain
-    T->Entry[i] = newEntry;       // Update the bucket pointer
+    newEntry->next = T->Entry[Id]; // Insert at the head of the chain
+    T->Entry[Id] = newEntry;       // Update the bucket pointer
     T->Count++;
 }
 
 GainType MinNodeHashSearch(MinNodeHashTable *T, int Id, int PrevId) {
-    int i = Id % HashTableSize; // Compute the hash index
-    MinNodeHashTableEntry *entry = T->Entry[i];
+    // int i = Id % HashTableSize; // Compute the hash index
+    MinNodeHashTableEntry *entry = T->Entry[Id];
 
     // Traverse the chain for this bucket
     // while (entry != NULL) {
