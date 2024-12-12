@@ -8,6 +8,7 @@
 #include "GainType.h"
 
 #define HashTableSize 65521     /* Largest prime less than USHRT_MAX */
+#define MinNodeHashTableSize 5100
 #define MaxLoadFactor 0.75
 
 typedef struct HashTableEntry {
@@ -25,5 +26,22 @@ void HashInitialize(HashTable * T);
 void HashInsert(HashTable * T, unsigned Hash, GainType Cost);
 
 int HashSearch(HashTable * T, unsigned Hash, GainType Cost);
+
+typedef struct MinNodeHashTableEntry {
+    int Id;
+    int PrevId;
+    GainType PrevCostSum;
+} MinNodeHashTableEntry;
+
+typedef struct MinNodeHashTable {
+    MinNodeHashTableEntry *Entry[MinNodeHashTableSize];
+    int size;
+} MinNodeHashTable;
+
+void MinNodeHashInitialize(MinNodeHashTable * T);
+
+void MinNodeHashInsert(MinNodeHashTable * T, int Id, int PrevId, GainType PrevCostSum);
+
+GainType MinNodeHashSearch(MinNodeHashTable *T, int Id, int PrevId);
 
 #endif

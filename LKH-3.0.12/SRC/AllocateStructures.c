@@ -65,6 +65,12 @@ void AllocateStructures()
     
 #endif
 
+#ifdef CAVA_PENALTY
+    Free(MinNodeHTable);
+    MinNodeHTable = (MinNodeHashTable *) malloc(sizeof(MinNodeHashTable));
+    MinNodeHTable->size = Dimension + Salesmen;
+    MinNodeHashInitialize(MinNodeHTable);
+#endif
     AllocateSegments();
     K = MoveType;
     if (SubsequentMoveType > K)
