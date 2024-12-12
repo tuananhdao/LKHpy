@@ -31,7 +31,6 @@ typedef struct MinNodeHashTableEntry {
     int Id;
     int PrevId;
     GainType PrevCostSum;
-    struct MinNodeHashTableEntry *next; // Pointer to handle collisions
 } MinNodeHashTableEntry;
 
 typedef struct MinNodeHashTable {

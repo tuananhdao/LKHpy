@@ -90,7 +90,6 @@ void MinNodeHashInsert(MinNodeHashTable * T, int Id, int PrevId, GainType PrevCo
     newEntry->Id = Id;
     newEntry->PrevId = PrevId;
     newEntry->PrevCostSum = PrevCostSum;
-    newEntry->next = T->Entry[Id]; // Insert at the head of the chain
     T->Entry[Id] = newEntry;       // Update the bucket pointer
     T->Count++;
 }
