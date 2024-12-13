@@ -42,6 +42,7 @@ See [PARAMETERS](LKH-3.0.12/DOC/LKH-3_PARAMETERS.pdf) for parameter lists. Some 
 params = {
         '#SHOW_OUTPUT': False,
         'SPECIAL': '',
+        'INITIAL_TOUR_ALGORITHM': 'NEAREST-NEIGHBOR',
         'MTSP_OBJECTIVE': 'MINMAX',
         'MAX_CANDIDATES': 6,
         'MAX_TRIALS': 10000,
