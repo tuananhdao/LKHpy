@@ -6,6 +6,7 @@
 
 #ifdef CAVA_PENALTY
 static GainType oldPenaltyMax;
+GainType MaxOldPenaltyInSwaps;
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -88,23 +89,8 @@ GainType Penalty_MTSP_MINMAX()
         setup_Penalty_MTSP_MINMAX();
 
         GainType DistanceSum;
-        GainType MaxOldPenaltyInSwaps = 0;
+        MaxOldPenaltyInSwaps = 0;
         Node *N;
-
-        // Early exit 1
-        for (int i = 1; i < Salesmen + 1; i++)
-        {
-            if (cava_PetalsData[i].flag)
-            {
-                MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, cava_PetalsData[i].OldPenalty);
-                cava_PetalsData[i].flag = 0;
-            }
-        }
-        if (MaxOldPenaltyInSwaps < oldPenaltyMax)
-        {
-            // printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped.\n", MaxOldPenaltyInSwaps, oldPenaltyMax);
-            return CurrentPenalty;
-        }
 
         // Early exit 2
         if (oldPenaltyMax < CurrentPenalty)
@@ -145,6 +131,10 @@ GainType Penalty_MTSP_MINMAX()
                     N = si->t1->PFlag ? si->t1 : si->t4;
                 if (N->PFlag)
                 {
+                    // For early exit 1
+                    MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
+                    MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, SUCC(N)->PetalId->OldPenalty);
+                    MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, PREDD(N)->PetalId->OldPenalty);
                     // Calculate the penalty for the route
                     DistanceSum = calculate_DistanceSum(N, 1) + calculate_DistanceSum(N, 0);
                     // printff("N, PREDD(N), SUCC(N): %d, %d, %d\n", N->Id, PREDD(N)->Id, SUCC(N)->Id);
@@ -162,6 +152,12 @@ GainType Penalty_MTSP_MINMAX()
                     }
                 }
             }
+        }
+
+        if (MaxOldPenaltyInSwaps < oldPenaltyMax)
+        {
+            // printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped.\n", MaxOldPenaltyInSwaps, oldPenaltyMax);
+            return CurrentPenalty;
         }
 
         if (!CurrentPenalty)
@@ -254,9 +250,6 @@ static void setup_Penalty_MTSP_MINMAX()
         s->t2->PFlag = !s->t2->DepotId;
         s->t3->PFlag = !s->t3->DepotId;
         s->t4->PFlag = !s->t4->DepotId;
-
-        // mark the involved routes with flag = 1 for the early exit MaxOldPenaltyInSwaps < oldPenaltyMax
-        s->t1->PetalId->flag = s->t2->PetalId->flag = s->t3->PetalId->flag = s->t4->PetalId->flag = 1;
     }
     MinNodeHashInitialize(MinNodeHTable);
     for (int i = 1; i < Salesmen + 1; i++)

@@ -14,6 +14,8 @@ def test_mtsp():
         '#SHOW_OUTPUT': SHOW_OUTPUT,
         'SPECIAL': '',
         'INITIAL_TOUR_ALGORITHM': 'NEAREST-NEIGHBOR',
+        "MOVE_TYPE": "3 SPECIAL",
+        "SUBSEQUENT_MOVE_TYPE": "5",
         'SEED': 1,
         'MTSP_OBJECTIVE': 'MINMAX',
         'MAX_CANDIDATES': 6,
