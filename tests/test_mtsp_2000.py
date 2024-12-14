@@ -11,7 +11,7 @@ def test_mtsp():
     with open('tests/data/nghi2000.txt', 'r') as json_file:
         cost_matrix = json.load(json_file)
     with open("tests/data/sample.tour", 'r') as f:
-        initial_tour = [int(line.strip()) for line in f if line.strip() and line.strip() != "EOF"]
+        initial_tour = [int(line.strip()) for line in f if line.strip()]
     params = {
         '#SHOW_OUTPUT': SHOW_OUTPUT,
         'SPECIAL': '',

@@ -34,12 +34,7 @@ py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict p
         throw std::runtime_error("Invalid array type");
     } 
 
-    FILE *file = fopen("/root/LKHpy/tests/data/sample.tour", "r");
-    if (file == NULL) {
-        perror("Error opening file");
-    }
-    Read_TOUR_SECTION(&file);
-    fclose(file);
+    Read_TOUR_SECTION(initial_tour);
 
     if (SubproblemSize > 0) {
         if (DelaunayPartitioning)

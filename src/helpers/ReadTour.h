@@ -12,6 +12,6 @@ extern "C" {
 
 static void CreateNodes(void);
 
-void Read_TOUR_SECTION(FILE ** File);
+void Read_TOUR_SECTION(py::array_t<int> initial_tour);
 
 #endif // READ_TOUR_H
