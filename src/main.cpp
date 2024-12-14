@@ -39,13 +39,13 @@ PYBIND11_MODULE(LKHpy, m) {
         )pbdoc");
 
     m.def("cost_matrix",
-        [](py::array_t<int> array, py::dict params) -> py::array_t<int> {
+        [](py::array_t<int> array, py::dict params, py::array_t<int> initial_tour) -> py::array_t<int> {
             if (params.contains("#SHOW_OUTPUT"))
                 SHOW_OUTPUT = params.attr("get")("#SHOW_OUTPUT").cast<bool>();
 
             OutputSuppressor suppressor;
 
-            return solve_int("cost_matrix", array, params);
+            return solve_int("cost_matrix", array, params, initial_tour);
         },
         R"pbdoc(
             Run KLH algorithm given a cost matrix and parameters
@@ -58,7 +58,9 @@ PYBIND11_MODULE(LKHpy, m) {
 
             OutputSuppressor suppressor;
 
-            return solve_int("euclid", array, params);
+            py::array_t<int> initial_tour = py::array_t<int>(0); // temp: pass an empty initial tour
+
+            return solve_int("euclid", array, params, initial_tour);
         },
         R"pbdoc(
             Run KLH algorithm given euclid coordinates and parameters

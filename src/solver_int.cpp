@@ -1,7 +1,7 @@
 #include "solver_int.h"
 
 // Function to accept a 2D NumPy array
-py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict params) {
+py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict params, py::array_t<int> initial_tour) {
     // Ensure the input is a 2D array
     if (array.ndim() != 2) {
         throw std::runtime_error("Input should be a 2D NumPy array");
@@ -32,7 +32,9 @@ py::array_t<int> solve_int(py::str arrayType, py::array_t<int> array, py::dict p
     }
     else {
         throw std::runtime_error("Invalid array type");
-    }
+    } 
+
+    Read_TOUR_SECTION(initial_tour);
 
     if (SubproblemSize > 0) {
         if (DelaunayPartitioning)
