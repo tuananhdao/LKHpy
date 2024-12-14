@@ -13,7 +13,7 @@ def test_mtsp():
     params = {
         '#SHOW_OUTPUT': SHOW_OUTPUT,
         'SPECIAL': '',
-        'INITIAL_TOUR_ALGORITHM': 'NEAREST-NEIGHBOR',
+        'INITIAL_TOUR_FILE' : './LKH-3.0.12/sample.tour',
         "MOVE_TYPE": "3 SPECIAL",
         "SUBSEQUENT_MOVE_TYPE": "5",
         'SEED': 1,
