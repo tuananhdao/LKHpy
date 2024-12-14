@@ -127,7 +127,7 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="LKHpy",
-    version="0.0.8",
+    version="0.0.9",
     author="Tuan Anh Dao",
     author_email="dta.hust@gmail.com",
     description="LKHpy",
