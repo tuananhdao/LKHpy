@@ -6,7 +6,6 @@
 
 #ifdef CAVA_PENALTY
 static GainType oldPenaltyMax;
-GainType MaxOldPenaltyInSwaps;
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -89,7 +88,7 @@ GainType Penalty_MTSP_MINMAX()
         setup_Penalty_MTSP_MINMAX();
 
         GainType DistanceSum;
-        MaxOldPenaltyInSwaps = 0;
+        GainType MaxOldPenaltyInSwaps = 0;
         Node *N;
 
         // Early exit 2
@@ -158,11 +157,6 @@ GainType Penalty_MTSP_MINMAX()
         {
             // printffff("MaxOldPenaltyInSwaps %d < oldPenaltyMax %d. Skipped.\n", MaxOldPenaltyInSwaps, oldPenaltyMax);
             return CurrentPenalty;
-        }
-
-        if (!CurrentPenalty)
-        {
-            return P;
         }
 
         P = get_max_cost();
