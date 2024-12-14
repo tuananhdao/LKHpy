@@ -16,7 +16,8 @@ extern "C" {
 #include "helpers/GetOutputTour.h"
 #include "helpers/ReadMatrix.h"
 #include "helpers/ReadXY_int.h"
+#include "helpers/ReadTour.h"
 
-py::array_t<int> solve_int(py::str, py::array_t<int>, py::dict);
+py::array_t<int> solve_int(py::str, py::array_t<int>, py::dict, py::array_t<int> initial_tour);
 
 #endif // SOLVER_INT_H
