@@ -131,9 +131,8 @@ GainType Penalty_MTSP_MINMAX()
                 if (N->PFlag)
                 {
                     // For early exit 1
-                    MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->PetalId->OldPenalty);
-                    MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, SUCC(N)->PetalId->OldPenalty);
-                    MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, PREDD(N)->PetalId->OldPenalty);
+                    MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->Pred->PetalId->OldPenalty);
+                    MaxOldPenaltyInSwaps = MAX(MaxOldPenaltyInSwaps, N->Suc->PetalId->OldPenalty);
                     // Calculate the penalty for the route
                     DistanceSum = calculate_DistanceSum(N, 1) + calculate_DistanceSum(N, 0);
                     // printff("N, PREDD(N), SUCC(N): %d, %d, %d\n", N->Id, PREDD(N)->Id, SUCC(N)->Id);
@@ -304,9 +303,6 @@ static GainType update_Penalty_MTSP_MINMAX()
     RouteData *CurrId;
     GainType Cost;
     GainType MaxCost = 0;
-    int i = 1;
-    // printff("Round %d update_Penalty_MTSP_MINMAX\n", SwapCaseCount);
-    // printfff("Update Penalty_MTSP_MINMAX (expensive func)\n");
     do
     {
         Cost = 0;
@@ -327,7 +323,6 @@ static GainType update_Penalty_MTSP_MINMAX()
         Cost /= Precision;
         CurrId->OldPenalty = Cost;
         MaxCost = MAX(MaxCost, Cost);
-        // printfff("-- New: route %d : %d\n", i++, Cost);
     } while (N != Depot);
 
     for (int i = 1; i < Salesmen + 1; i++)
