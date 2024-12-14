@@ -10,8 +10,9 @@ test_data = [
 
 @pytest.mark.parametrize("cost_matrix, exact_tour", test_data)
 def test_tsp(cost_matrix, exact_tour):
+    initial_tour = [] # currently empty  
     params = {
         'RUNS' : 1
     }
-    result = LK.cost_matrix(cost_matrix, params)
+    result = LK.cost_matrix(cost_matrix, params, initial_tour)
     assert calculate_cost_from_cost_matrix(cost_matrix, result) == calculate_cost_from_cost_matrix(cost_matrix, exact_tour), f"Expected {exact_tour}, got {result}"

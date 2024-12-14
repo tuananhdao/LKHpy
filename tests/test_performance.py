@@ -9,10 +9,11 @@ test_data = [
 
 @pytest.mark.parametrize("cost_matrix, runs, target_timing_per_run", test_data)
 def test_performance(cost_matrix, runs, target_timing_per_run):
+    initial_tour = [] # currently empty
     params = {
         'RUNS' : runs
     }
     start = time.time()
-    LK.cost_matrix(cost_matrix, params)
+    LK.cost_matrix(cost_matrix, params, initial_tour)
     averageRunTime = (time.time() - start) / runs
     assert averageRunTime < target_timing_per_run, f"Expected less than {target_timing_per_run} seconds, got {averageRunTime}"
